@@ -36,3 +36,17 @@ func AllUsers() ([]*User, error) {
 	}
 	return users, nil
 }
+
+//SpecificUserWithID return specific user from db by using id
+func SpecificUserWithID(id int) (*User, error) {
+	statement := `SELECT * FROM grader_user WHERE id=$1`
+	row := db.DB.QueryRow(statement, id)
+
+	user := new(User)
+
+	err := row.Scan(&user.ID, &user.Username, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
