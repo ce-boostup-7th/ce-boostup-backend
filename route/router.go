@@ -11,6 +11,7 @@ func Init() *echo.Echo {
 	e := echo.New()
 
 	e.GET("/", api.Home)
+	e.GET("/user", api.GetUser)
 
 	return e
 }
