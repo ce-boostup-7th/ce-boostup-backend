@@ -2,21 +2,26 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_ "github.com/lib/pq"
 )
 
-//Init querying postgresql db
+//DB a pointer to sql database
+var DB *sql.DB
+
+//Init postgresql db
 func Init() {
-	connStr := "user=lord-tantatorn dbname=ce_boostup_db sslmode=verify-full"
+	connStr := "user=lord-tantatorn password=pass port=5432 dbname=ce_boostup_db sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	rows, err := db.Query("SELECT username FROM grader_user WHERE id = 1")
+	if err = db.Ping(); err != nil {
+		log.Fatal(err)
+	}
 
-	fmt.Println(rows)
+	DB = db
+	DB.SetMaxIdleConns(5)
 }
