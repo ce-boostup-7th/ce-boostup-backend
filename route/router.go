@@ -12,5 +12,13 @@ func Init() *echo.Echo {
 
 	e.GET("/", api.Home)
 
+	//user handlers
+	e.GET("/users", api.GetAllUsers)
+	e.GET("/users/:id", api.GetUserWithID)
+	e.POST("/users", api.CreateUser)
+	e.PUT("/users/:id", api.UpdateUser)
+	e.DELETE("/users", api.DeleteAllUsers)
+	e.DELETE("/users/:id", api.DeleteUserWithSpecificID)
+
 	return e
 }
