@@ -11,6 +11,16 @@ type User struct {
 	Password string
 }
 
+//NewUser add a new user
+func NewUser(username string, password string) error {
+	statement := `INSERT INTO grader_user (username,password) VALUES ($1,$2)`
+	_, err := db.DB.Exec(statement, username, password)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //AllUsers Get all users info from db
 func AllUsers() ([]*User, error) {
 	rows, err := db.DB.Query("SELECT * FROM grader_user")

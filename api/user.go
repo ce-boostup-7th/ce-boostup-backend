@@ -2,12 +2,24 @@ package api
 
 import (
 	"ce-boostup-backend/model"
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo"
 )
+
+//CreateUser create a new user
+func CreateUser(c echo.Context) error {
+	values := c.QueryParams()
+
+	err := model.NewUser(values.Get("username"), values.Get("password"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return c.String(http.StatusCreated, "a new user created")
+}
 
 //GetAllUsers get all users info
 func GetAllUsers(c echo.Context) error {
@@ -24,7 +36,7 @@ func GetUserWithID(c echo.Context) error {
 	//convert string to int
 	id, err := strconv.Atoi(str)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	var usr *model.User

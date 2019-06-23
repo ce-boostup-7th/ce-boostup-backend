@@ -13,8 +13,9 @@ func Init() *echo.Echo {
 	e.GET("/", api.Home)
 
 	//user handlers
-	e.GET("/user", api.GetAllUsers)
-	e.GET("/user/:id", api.GetUserWithID)
+	e.GET("/users", api.GetAllUsers)
+	e.GET("/users/:id", api.GetUserWithID)
+	e.POST("/users", api.CreateUser)
 
 	return e
 }
