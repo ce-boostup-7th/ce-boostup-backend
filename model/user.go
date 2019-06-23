@@ -65,7 +65,7 @@ func SpecificUserWithID(id int) (*User, error) {
 //UpdateUser update user data
 func UpdateUser(usr User) error {
 	statement := `UPDATE grader_user SET username=$1, password=$2 WHERE id=$3;`
-	_, err := db.DB.Exec(statement, usr.Username, usr.Password, 1)
+	_, err := db.DB.Exec(statement, usr.Username, usr.Password, usr.ID)
 	if err != nil {
 		fmt.Println("hola")
 		return err
@@ -73,10 +73,21 @@ func UpdateUser(usr User) error {
 	return nil
 }
 
-//DeleteAllUsers delete all users from db
+//DeleteAllUsers clean users
 func DeleteAllUsers() error {
-	statement := "DELETE FROM grader_user; ALTER SEQUENCE grader_user_id_seq RESTART WITH 1"
+	statement := "DELETE FROM grader_user; ALTER SEQUENCE grader_user_id_seq RESTART WITH 1;"
 	_, err := db.DB.Exec(statement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//DeleteUserWithSpecificID delete user by id
+func DeleteUserWithSpecificID(id int) error {
+	statement := fmt.Sprintf("DELETE FROM grader_user WHERE id=%d ; ALTER SEQUENCE grader_user_id_seq RESTART WITH 1;", id)
+	_, err := db.DB.Exec(statement)
+
 	if err != nil {
 		return err
 	}

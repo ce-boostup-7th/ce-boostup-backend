@@ -2,6 +2,7 @@ package api
 
 import (
 	"ce-boostup-backend/model"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -75,8 +76,10 @@ func UpdateUser(c echo.Context) error {
 		usr.Password = temp.Password
 	}
 
-	errr := model.UpdateUser(usr)
-	if errr != nil {
+	usr.ID = id
+
+	err = model.UpdateUser(usr)
+	if err != nil {
 		return c.String(http.StatusNotFound, "update failed")
 	}
 	return c.String(http.StatusOK, "updated")
@@ -86,12 +89,25 @@ func UpdateUser(c echo.Context) error {
 func DeleteAllUsers(c echo.Context) error {
 	err := model.DeleteAllUsers()
 	if err != nil {
-		return c.String(http.StatusForbidden, "delete failed")
+		return c.String(http.StatusNotFound, "delete failed")
 	}
 	return c.String(http.StatusOK, "deleted")
 }
 
 //DeleteUserWithSpecificID delete an user by id
-func DeleteUserWithSpecificID() {
+func DeleteUserWithSpecificID(c echo.Context) error {
+	str := c.Param("id")
 
+	//convert string to int
+	id, err := strconv.Atoi(str)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err1 := model.DeleteUserWithSpecificID(id)
+	if err1 != nil {
+		fmt.Println(err1)
+		return c.String(http.StatusNotFound, "delete failed")
+	}
+	return c.String(http.StatusOK, "deleted")
 }
