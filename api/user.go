@@ -81,3 +81,17 @@ func UpdateUser(c echo.Context) error {
 	}
 	return c.String(http.StatusOK, "updated")
 }
+
+//DeleteAllUsers delete all users
+func DeleteAllUsers(c echo.Context) error {
+	err := model.DeleteAllUsers()
+	if err != nil {
+		return c.String(http.StatusForbidden, "delete failed")
+	}
+	return c.String(http.StatusOK, "deleted")
+}
+
+//DeleteUserWithSpecificID delete an user by id
+func DeleteUserWithSpecificID() {
+
+}

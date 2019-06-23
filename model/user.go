@@ -72,3 +72,13 @@ func UpdateUser(usr User) error {
 	}
 	return nil
 }
+
+//DeleteAllUsers delete all users from db
+func DeleteAllUsers() error {
+	statement := "DELETE FROM grader_user; ALTER SEQUENCE grader_user_id_seq RESTART WITH 1"
+	_, err := db.DB.Exec(statement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
