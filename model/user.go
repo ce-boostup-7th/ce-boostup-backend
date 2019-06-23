@@ -2,6 +2,7 @@ package model
 
 import (
 	"ce-boostup-backend/db"
+	"fmt"
 )
 
 //User a grader user model
@@ -59,4 +60,15 @@ func SpecificUserWithID(id int) (*User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+//UpdateUser update user data
+func UpdateUser(usr User) error {
+	statement := `UPDATE grader_user SET username=$1, password=$2 WHERE id=$3;`
+	_, err := db.DB.Exec(statement, usr.Username, usr.Password, 1)
+	if err != nil {
+		fmt.Println("hola")
+		return err
+	}
+	return nil
 }

@@ -16,6 +16,7 @@ func Init() *echo.Echo {
 	e.GET("/users", api.GetAllUsers)
 	e.GET("/users/:id", api.GetUserWithID)
 	e.POST("/users", api.CreateUser)
+	e.PUT("/users/:id", api.UpdateUser)
 
 	return e
 }
