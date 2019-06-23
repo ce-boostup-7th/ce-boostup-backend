@@ -24,7 +24,7 @@ func NewUser(username string, password string) error {
 
 //AllUsers Get all users info from db
 func AllUsers() ([]*User, error) {
-	rows, err := db.DB.Query("SELECT * FROM grader_user")
+	rows, err := db.DB.Query("SELECT * FROM grader_user ORDER BY id")
 	if err != nil {
 		return nil, err
 	}
