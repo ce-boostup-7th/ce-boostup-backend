@@ -22,6 +22,7 @@ func Init() *echo.Echo {
 
 	//problem handlers
 	e.GET("/problems", api.GetAllProblems)
+	e.GET("/problems/:id", api.GetProblemWithID)
 
 	return e
 }

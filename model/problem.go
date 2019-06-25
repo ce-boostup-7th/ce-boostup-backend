@@ -33,7 +33,7 @@ func AllProblems() ([]*Problem, error) {
 	for rows.Next() {
 		problem := new(Problem)
 
-    err := rows.Scan(&problem.ID, &problem.Title, &problem.Description, &problem.CategoryID, &problem.Difficulty, &problem.CreatedAt, &problem.UpdatedAt)
+		err := rows.Scan(&problem.ID, &problem.Title, &problem.Description, &problem.CategoryID, &problem.Difficulty, &problem.CreatedAt, &problem.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -41,4 +41,18 @@ func AllProblems() ([]*Problem, error) {
 	}
 
 	return problems, nil
+}
+
+//SpecificProblemWithID return specific problem
+func SpecificProblemWithID(id int) (*Problem, error) {
+	statement := `SELECT id,title,description,categoryID,difficulty,createdAt,updatedAt FROM problem WHERE id=$1`
+	row := db.DB.QueryRow(statement, id)
+
+	problem := new(Problem)
+
+	err := row.Scan(&problem.ID, &problem.Title, &problem.Description, &problem.CategoryID, &problem.Difficulty, &problem.CreatedAt, &problem.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return problem, nil
 }
