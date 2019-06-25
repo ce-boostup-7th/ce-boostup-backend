@@ -24,9 +24,7 @@ func CreateUser(c echo.Context) error {
 
 //GetAllUsers get all users info
 func GetAllUsers(c echo.Context) error {
-	var usr []*model.User
-
-	usr, _ = model.AllUsers()
+	usr, _ := model.AllUsers()
 	return c.JSON(http.StatusOK, usr)
 }
 

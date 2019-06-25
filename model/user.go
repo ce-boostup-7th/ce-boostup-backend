@@ -67,13 +67,12 @@ func UpdateUser(usr User) error {
 	statement := `UPDATE grader_user SET username=$1, password=$2 WHERE id=$3;`
 	_, err := db.DB.Exec(statement, usr.Username, usr.Password, usr.ID)
 	if err != nil {
-		fmt.Println("hola")
 		return err
 	}
 	return nil
 }
 
-//DeleteAllUsers clean users
+//DeleteAllUsers clean user
 func DeleteAllUsers() error {
 	statement := "DELETE FROM grader_user; ALTER SEQUENCE grader_user_id_seq RESTART WITH 1;"
 	_, err := db.DB.Exec(statement)

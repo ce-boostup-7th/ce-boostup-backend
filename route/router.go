@@ -20,5 +20,8 @@ func Init() *echo.Echo {
 	e.DELETE("/users", api.DeleteAllUsers)
 	e.DELETE("/users/:id", api.DeleteUserWithSpecificID)
 
+	//problem handlers
+	e.GET("/problems", api.GetAllProblems)
+
 	return e
 }
