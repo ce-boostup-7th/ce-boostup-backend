@@ -2,6 +2,7 @@ package api
 
 import (
 	"ce-boostup-backend/model"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -37,6 +38,24 @@ func GetProblemWithID(c echo.Context) error {
 func DeleteAllProblems(c echo.Context) error {
 	err := model.DeleteAllProblems()
 	if err != nil {
+		return c.String(http.StatusNotFound, "delete failed")
+	}
+	return c.String(http.StatusOK, "deleted")
+}
+
+//DeleteProblemWithSpecificID delete a problem by id
+func DeleteProblemWithSpecificID(c echo.Context) error {
+	str := c.Param("id")
+
+	//convert string to int
+	id, err := strconv.Atoi(str)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err1 := model.DeleteProblemWithSpecificID(id)
+	if err1 != nil {
+		fmt.Println(err1)
 		return c.String(http.StatusNotFound, "delete failed")
 	}
 	return c.String(http.StatusOK, "deleted")

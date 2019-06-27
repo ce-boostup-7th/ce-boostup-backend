@@ -24,6 +24,7 @@ func Init() *echo.Echo {
 	e.GET("/problems", api.GetAllProblems)
 	e.GET("/problems/:id", api.GetProblemWithID)
 	e.DELETE("/problems", api.DeleteAllProblems)
+	e.DELETE("problems/:id", api.DeleteProblemWithSpecificID)
 
 	return e
 }

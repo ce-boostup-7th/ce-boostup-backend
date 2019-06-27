@@ -2,6 +2,7 @@ package model
 
 import (
 	"ce-boostup-backend/db"
+	"fmt"
 )
 
 //Testcase input and output of testcases
@@ -61,6 +62,17 @@ func SpecificProblemWithID(id int) (*Problem, error) {
 func DeleteAllProblems() error {
 	statement := "DELETE FROM problem; ALTER SEQUENCE problem_id_seq RESTART WITH 1;"
 	_, err := db.DB.Exec(statement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//DeleteProblemWithSpecificID delete problem by id
+func DeleteProblemWithSpecificID(id int) error {
+	statement := fmt.Sprintf("DELETE FROM problem WHERE id=%d ; ALTER SEQUENCE problem_id_seq RESTART WITH 1;", id)
+	_, err := db.DB.Exec(statement)
+
 	if err != nil {
 		return err
 	}
