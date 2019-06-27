@@ -23,6 +23,7 @@ func Init() *echo.Echo {
 	//problem handlers
 	e.GET("/problems", api.GetAllProblems)
 	e.GET("/problems/:id", api.GetProblemWithID)
+	e.DELETE("/problems", api.DeleteAllProblems)
 
 	return e
 }

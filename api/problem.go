@@ -32,3 +32,12 @@ func GetProblemWithID(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, problem)
 }
+
+//DeleteAllProblems delete every problems
+func DeleteAllProblems(c echo.Context) error {
+	err := model.DeleteAllProblems()
+	if err != nil {
+		return c.String(http.StatusNotFound, "delete failed")
+	}
+	return c.String(http.StatusOK, "deleted")
+}

@@ -56,3 +56,13 @@ func SpecificProblemWithID(id int) (*Problem, error) {
 	}
 	return problem, nil
 }
+
+//DeleteAllProblems cleans all problem
+func DeleteAllProblems() error {
+	statement := "DELETE FROM problem; ALTER SEQUENCE problem_id_seq RESTART WITH 1;"
+	_, err := db.DB.Exec(statement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
