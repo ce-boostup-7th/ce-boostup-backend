@@ -22,6 +22,16 @@ type Problem struct {
 	UpdatedAt   string //time updated
 }
 
+//NewProblem add new problem
+func NewProblem(title string, categoryID int, difficulty int) error {
+	statement := `INSERT INTO problem (title,categoryID,difficulty) VALUES ($1,$2,$3)`
+	_, err := db.DB.Exec(statement, title, categoryID, difficulty)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //AllProblems return all problems in db
 func AllProblems() ([]*Problem, error) {
 	rows, err := db.DB.Query("SELECT id,title,description,categoryID,difficulty,createdAt,updatedAt FROM problem ORDER BY id")

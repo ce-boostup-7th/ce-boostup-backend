@@ -10,6 +10,24 @@ import (
 	"github.com/labstack/echo"
 )
 
+//CreateProblem create a new problem
+func CreateProblem(c echo.Context) error {
+	values := c.QueryParams()
+
+	//convert string to int
+	categoryID, _ := strconv.Atoi(values.Get("categoryID"))
+
+	//convert string to int
+	difficulty, _ := strconv.Atoi(values.Get("difficulty"))
+
+	err := model.NewProblem(values.Get("title"), categoryID, difficulty)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return c.String(http.StatusCreated, "a new problem created")
+}
+
 //GetAllProblems get all problems
 func GetAllProblems(c echo.Context) error {
 	problems, _ := model.AllProblems()
