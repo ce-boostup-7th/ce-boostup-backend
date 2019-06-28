@@ -1,0 +1,80 @@
+package api
+
+import (
+	"ce-boostup-backend/model"
+	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo"
+)
+
+//CreateProblem create a new problem
+func CreateProblem(c echo.Context) error {
+	values := c.QueryParams()
+
+	//convert string to int
+	categoryID, _ := strconv.Atoi(values.Get("categoryID"))
+
+	//convert string to int
+	difficulty, _ := strconv.Atoi(values.Get("difficulty"))
+
+	err := model.NewProblem(values.Get("title"), categoryID, difficulty)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return c.String(http.StatusCreated, "a new problem created")
+}
+
+//GetAllProblems get all problems
+func GetAllProblems(c echo.Context) error {
+	problems, _ := model.AllProblems()
+	return c.JSON(http.StatusOK, problems)
+}
+
+//GetProblemWithID get specific problem by id
+func GetProblemWithID(c echo.Context) error {
+	str := c.Param("id")
+
+	//convert string to int
+	id, err := strconv.Atoi(str)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var problem *model.Problem
+	problem, err = model.SpecificProblemWithID(id)
+	if err != nil {
+		return c.String(http.StatusNotFound, "not found that problem")
+	}
+	return c.JSON(http.StatusOK, problem)
+}
+
+//DeleteAllProblems delete every problems
+func DeleteAllProblems(c echo.Context) error {
+	err := model.DeleteAllProblems()
+	if err != nil {
+		return c.String(http.StatusNotFound, "delete failed")
+	}
+	return c.String(http.StatusOK, "deleted")
+}
+
+//DeleteProblemWithSpecificID delete a problem by id
+func DeleteProblemWithSpecificID(c echo.Context) error {
+	str := c.Param("id")
+
+	//convert string to int
+	id, err := strconv.Atoi(str)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err1 := model.DeleteProblemWithSpecificID(id)
+	if err1 != nil {
+		fmt.Println(err1)
+		return c.String(http.StatusNotFound, "delete failed")
+	}
+	return c.String(http.StatusOK, "deleted")
+}
