@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" //justify
 )
 
 //DB a pointer to sql database

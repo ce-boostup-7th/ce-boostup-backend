@@ -51,12 +51,12 @@ func UpdateUser(c echo.Context) error {
 	var usr model.User
 
 	str := c.Param("id")
-
 	//convert string to int
 	id, err := strconv.Atoi(str)
 	if err != nil {
 		log.Fatal(err)
 	}
+	usr.ID = id
 
 	values := c.QueryParams()
 
@@ -73,8 +73,6 @@ func UpdateUser(c echo.Context) error {
 		temp, _ := model.SpecificUserWithID(id)
 		usr.Password = temp.Password
 	}
-
-	usr.ID = id
 
 	err = model.UpdateUser(usr)
 	if err != nil {
