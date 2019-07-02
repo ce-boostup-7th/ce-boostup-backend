@@ -10,6 +10,7 @@ type User struct {
 	ID       int
 	Username string
 	Password string
+	Score    float32
 }
 
 //NewUser add a new user
@@ -34,7 +35,7 @@ func AllUsers() ([]*User, error) {
 	for rows.Next() {
 		user := new(User)
 
-		err := rows.Scan(&user.ID, &user.Username, &user.Password)
+		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Score)
 		if err != nil {
 			return nil, err
 		}
@@ -55,14 +56,14 @@ func SpecificUserWithID(id int) (*User, error) {
 
 	user := new(User)
 
-	err := row.Scan(&user.ID, &user.Username, &user.Password)
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Score)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-//UpdateUser update user data
+//UpdateUser update user credential data
 func UpdateUser(usr User) error {
 	statement := `UPDATE grader_user SET username=$1, password=$2 WHERE id=$3;`
 	_, err := db.DB.Exec(statement, usr.Username, usr.Password, usr.ID)

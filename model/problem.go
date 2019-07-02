@@ -68,6 +68,17 @@ func SpecificProblemWithID(id int) (*Problem, error) {
 	return problem, nil
 }
 
+//UpdateProblem update problem datat
+func UpdateProblem(problem Problem) error {
+	statement := `UPDATE problem SET title=$1,description=$2,categoryID=$3,difficulty=$4,updatedat=CURRENT_TIMESTAMP WHERE id=$5`
+	_, err := db.DB.Exec(statement, problem.Title, problem.Description, problem.CategoryID, problem.Difficulty, problem.ID)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
 //DeleteAllProblems cleans all problem
 func DeleteAllProblems() error {
 	statement := "DELETE FROM problem; ALTER SEQUENCE problem_id_seq RESTART WITH 1;"
