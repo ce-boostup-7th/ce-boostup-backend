@@ -3,6 +3,7 @@ package api
 import (
 	"ce-boostup-backend/model"
 	"net/http"
+	"os"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -31,7 +32,7 @@ func Login(c echo.Context) error {
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 	//Generate encoded token and send it as response
-	t, err := token.SignedString([]byte("secret"))
+	t, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		return err
 	}
