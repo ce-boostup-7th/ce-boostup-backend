@@ -8,13 +8,17 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //CreateUser create a new user
 func CreateUser(c echo.Context) error {
 	values := c.QueryParams()
 
-	err := model.NewUser(values.Get("username"), values.Get("password"))
+	//hash a password
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(values.Get("password")), 14)
+	fmt.Println(string(bytes))
+	err := model.NewUser(values.Get("username"), string(bytes))
 	if err != nil {
 		log.Fatal(err)
 	}
