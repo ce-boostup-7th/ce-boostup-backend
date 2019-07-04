@@ -2,6 +2,7 @@ package api
 
 import (
 	"ce-boostup-backend/model"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -37,9 +38,13 @@ func Login(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"token": t,
-	})
+	cookie := new(http.Cookie)
+	cookie.Name = "JWT token"
+	cookie.Value = t
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.SetCookie(cookie)
+
+	return c.String(http.StatusOK, "logged in")
 }
 
 //Accessible accessible without authentication
@@ -59,4 +64,13 @@ func isPasswordCorrect(username string, password string) bool {
 	hashedPassword, _ := model.PasswordByUsername(username)
 	err := bcrypt.CompareHashAndPassword([]byte(*hashedPassword), []byte(password))
 	return err == nil
+}
+
+func writeCookie(c echo.Context) {
+}
+
+func readCookie(c echo.Context) {
+	cookie, _ := c.Cookie("username")
+	fmt.Println(cookie.Name)
+	fmt.Println(cookie.Value)
 }
