@@ -39,7 +39,7 @@ func Login(c echo.Context) error {
 	}
 
 	cookie := new(http.Cookie)
-	cookie.Name = "JWT token"
+	cookie.Name = "JWT"
 	cookie.Value = t
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	c.SetCookie(cookie)
