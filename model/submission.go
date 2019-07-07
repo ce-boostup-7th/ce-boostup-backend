@@ -19,8 +19,15 @@ type Submission struct {
 
 //NewSubmission create a new submission
 func NewSubmission(userID int, problemID int, languageID int, src string) error {
-	statement := `INSERT INTO submission (usr_id,problem_id,lang_id,src) VALUES ($1,$2,$3,$4)`
-	_, err := db.DB.Exec(statement, userID, problemID, languageID, src)
+
+	score := 0
+	runtime := 0.0
+	memory := 0
+
+	//result := judge0.Submit(src, "", "") //empty string is for testcase in the future
+
+	statement := `INSERT INTO submission (usr_id,problem_id,lang_id,src,score,runtime,memory_usage) VALUES ($1,$2,$3,$4,$5,$6)`
+	_, err := db.DB.Exec(statement, userID, problemID, languageID, src, score, runtime, memory)
 	if err != nil {
 		return err
 	}

@@ -52,6 +52,15 @@ func GetProblemWithID(c echo.Context) error {
 	return c.JSON(http.StatusOK, problem)
 }
 
+// GetTestcaseWithID get testcase from judge0
+func GetTestcaseWithID(c echo.Context) error {
+	testcase, err := model.SpecificTestcaseWithID(1)
+	if err != nil {
+		return c.String(http.StatusNotFound, "not found any testcases")
+	}
+	return c.JSON(http.StatusOK, testcase)
+}
+
 //UpdateProblem update problem data
 func UpdateProblem(c echo.Context) error {
 	var problem model.Problem

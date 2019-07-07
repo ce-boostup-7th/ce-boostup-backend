@@ -37,6 +37,7 @@ func Init() *echo.Echo {
 	e.PUT("/problems/:id", api.UpdateProblem)
 	e.DELETE("/problems", api.DeleteAllProblems)
 	e.DELETE("problems/:id", api.DeleteProblemWithSpecificID)
+	e.GET("/problems/testcases/:id", api.GetTestcaseWithID)
 
 	// Restricted group
 	r := e.Group("/restricted")
