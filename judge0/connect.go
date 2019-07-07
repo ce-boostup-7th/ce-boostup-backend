@@ -30,7 +30,7 @@ var client = &http.Client{}
 func Submit(source, input, expectedOutput string) *Result {
 	url := "http://161.246.34.95:4000/submissions?wait=true"
 
-	req := map[string]string{"source_code": source, "language_id": "34", "expected_output": "9"}
+	req := map[string]string{"source_code": source, "language_id": "34", "expected_output": expectedOutput}
 
 	//convert request to io.Reader
 	reqByte, _ := json.Marshal(req)
