@@ -52,6 +52,46 @@ func GetProblemWithID(c echo.Context) error {
 	return c.JSON(http.StatusOK, problem)
 }
 
+// GetTestcaseWithID get testcase from judge0
+func GetTestcaseWithID(c echo.Context) error {
+	str := c.Param("id")
+
+	//convert string to int
+	id, err := strconv.Atoi(str)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	testcase, err := model.SpecificTestcaseWithID(id)
+	if err != nil {
+		return c.String(http.StatusNotFound, "not found any testcases")
+	}
+	return c.JSON(http.StatusOK, testcase)
+}
+
+//CreateTestcase create a new testcase
+func CreateTestcase(c echo.Context) error {
+	str := c.Param("id")
+
+	//convert string to int
+	id, err := strconv.Atoi(str)
+	if err != nil {
+		return c.JSON(http.StatusNotAcceptable, err)
+	}
+
+	values := c.QueryParams()
+
+	var testcase model.Testcase
+	testcase.Input = values.Get("input")
+	testcase.Output = values.Get("output")
+
+	err = model.NewTestcase(id, testcase)
+	if err != nil {
+		return c.JSON(http.StatusNotAcceptable, err)
+	}
+	return c.JSON(http.StatusOK, "okay")
+}
+
 //UpdateProblem update problem data
 func UpdateProblem(c echo.Context) error {
 	var problem model.Problem
