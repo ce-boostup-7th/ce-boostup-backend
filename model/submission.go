@@ -16,9 +16,9 @@ type Submission struct {
 	LanguageID   int     `json:"language_id" form:"language_id"`
 	Src          string  `json:"src" form:"src"`
 	SubmittedAt  string  `json:"submitted_at" form:"submitted_at"`
-	Score        int     `json:"score" form:"score"`
+	Score        float64 `json:"score" form:"score"`
 	Runtime      int     `json:"runtime" form:"runtime"`
-	MemoryUsage  float32 `json:"memory_usage" form:"memory_usage"`
+	MemoryUsage  int     `json:"memory_usage" form:"memory_usage"`
 }
 
 //NewSubmission create a new submission
@@ -37,11 +37,15 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 		result := judge0.Submit(src, testcase[i].Input, testcase[i].Output) //empty string is for testcase in the future
 		memory += result.Memory
 		runtime += stringToFloat(result.Time)
+		if result.Status.ID == 3 {
+			score++
+		}
 	}
 
 	length := len(testcase)
 	runtime = runtime / float64(length)
 	memory = memory / length
+	score = score / length * 100.0
 
 	statement := `INSERT INTO submission (usr_id,problem_id,lang_id,src,score,runtime,memory_usage) VALUES ($1,$2,$3,$4,$5,$6,$7)`
 	_, err = db.DB.Exec(statement, userID, problemID, languageID, src, score, runtime, memory)
