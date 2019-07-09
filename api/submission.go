@@ -2,7 +2,9 @@ package api
 
 import (
 	"ce-boostup-backend/model"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo"
 )
@@ -24,4 +26,22 @@ func GetAllSubmissions(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.JSON(http.StatusOK, submissions)
+}
+
+// GetSubmissionWithID get a specific submission by id
+func GetSubmissionWithID(c echo.Context) error {
+	str := c.Param("id")
+
+	//convert string to int
+	id, err := strconv.Atoi(str)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var submission *model.Submission
+	submission, err = model.SpecificSubmission(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
+	}
+	return c.JSON(http.StatusOK, submission)
 }

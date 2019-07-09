@@ -42,6 +42,7 @@ func Init() *echo.Echo {
 
 	//submission routes
 	e.GET("/submissions", api.GetAllSubmissions)
+	e.GET("/submissions/:id", api.GetSubmissionWithID)
 	e.POST("/submissions", api.CreateSubmission)
 
 	// Restricted group

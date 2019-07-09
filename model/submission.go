@@ -58,7 +58,7 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 
 // AllSubmissions get all submissions
 func AllSubmissions() ([]*Submission, error) {
-	rows, err := db.DB.Query("SELECT submission_id,src,usr_id,lang_id,submittedat,score,runtime,memory_usage FROM submission ORDER BY submission_id")
+	rows, err := db.DB.Query("SELECT submission_id,src,usr_id,problem_id,lang_id,submittedat,score,runtime,memory_usage FROM submission ORDER BY submission_id")
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func AllSubmissions() ([]*Submission, error) {
 	for rows.Next() {
 		submission := new(Submission)
 
-		err := rows.Scan(&submission.SubmissionID, &submission.Src, &submission.UserID, &submission.LanguageID, &submission.SubmittedAt, &submission.Score, &submission.Runtime, &submission.MemoryUsage)
+		err := rows.Scan(&submission.SubmissionID, &submission.Src, &submission.UserID, &submission.ProblemID, &submission.LanguageID, &submission.SubmittedAt, &submission.Score, &submission.Runtime, &submission.MemoryUsage)
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
@@ -79,6 +79,21 @@ func AllSubmissions() ([]*Submission, error) {
 	}
 
 	return submissions, nil
+}
+
+// SpecificSubmission return a specific submission by id
+func SpecificSubmission(id int) (*Submission, error) {
+	statement := `SELECT submission_id,src,usr_id,problem_id,lang_id,submittedat,score,runtime,memory_usage  FROM submission WHERE submission_id=$1`
+	row := db.DB.QueryRow(statement, id)
+
+	submission := new(Submission)
+
+	err := row.Scan(&submission.SubmissionID, &submission.Src, &submission.UserID, &submission.LanguageID, &submission.LanguageID, &submission.SubmittedAt, &submission.Score, &submission.Runtime, &submission.MemoryUsage)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return submission, nil
 }
 
 func stringToFloat(str string) float64 {
