@@ -3,7 +3,6 @@ package judge0
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -45,6 +44,5 @@ func Submit(source, input, expectedOutput string) *Result {
 	var result *Result
 	result = new(Result)
 	json.NewDecoder(res.Body).Decode(result)
-	fmt.Println(result)
 	return result
 }

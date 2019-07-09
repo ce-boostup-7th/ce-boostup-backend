@@ -40,6 +40,11 @@ func Init() *echo.Echo {
 	e.GET("/problems/testcases/:id", api.GetTestcaseWithID)
 	e.POST("/problems/testcases/:id", api.CreateTestcase)
 
+	//submission routes
+	e.GET("/submissions", api.GetAllSubmissions)
+	e.GET("/submissions/:id", api.GetSubmissionWithID)
+	e.POST("/submissions", api.CreateSubmission)
+
 	// Restricted group
 	r := e.Group("/restricted")
 	r.Use(middleware.JWT([]byte("secret")))
