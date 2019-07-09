@@ -2,7 +2,6 @@ package api
 
 import (
 	"ce-boostup-backend/model"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -28,18 +27,18 @@ func Login(c echo.Context) error {
 
 	//Set claims
 	claims := token.Claims.(jwt.MapClaims)
-	claims["name"] = "CE 1D"
+	claims["name"] = username
 	claims["admin"] = true
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 	//Generate encoded token and send it as response
 	t, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
-		return err
+		return c.JSON(http.StatusUnauthorized, err)
 	}
 
 	cookie := new(http.Cookie)
-	cookie.Name = "JWT"
+	cookie.Name = "JWT Token"
 	cookie.Value = t
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	c.SetCookie(cookie)
@@ -64,13 +63,4 @@ func isPasswordCorrect(username string, password string) bool {
 	hashedPassword, _ := model.PasswordByUsername(username)
 	err := bcrypt.CompareHashAndPassword([]byte(*hashedPassword), []byte(password))
 	return err == nil
-}
-
-func writeCookie(c echo.Context) {
-}
-
-func readCookie(c echo.Context) {
-	cookie, _ := c.Cookie("username")
-	fmt.Println(cookie.Name)
-	fmt.Println(cookie.Value)
 }

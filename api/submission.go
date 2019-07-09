@@ -12,7 +12,7 @@ import (
 func CreateSubmission(c echo.Context) error {
 	var submission model.Submission
 	if err := c.Bind(&submission); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, err)
 	}
 	model.NewSubmission(submission.UserID, submission.ProblemID, submission.LanguageID, submission.Src)
 	return c.JSON(http.StatusCreated, "created")
