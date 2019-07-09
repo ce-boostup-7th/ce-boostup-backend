@@ -11,12 +11,16 @@ import (
 
 //CreateUser create a new user
 func CreateUser(c echo.Context) error {
-	values := c.QueryParams()
+
+	var user model.User
+	if err := c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
 
 	//hash a password
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(values.Get("password")), 14)
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 
-	err := model.NewUser(values.Get("username"), string(bytes))
+	err := model.NewUser(user.Username, string(bytes))
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}
@@ -26,11 +30,11 @@ func CreateUser(c echo.Context) error {
 
 //GetAllUsers get all users info
 func GetAllUsers(c echo.Context) error {
-	usr, err := model.AllUsers()
+	user, err := model.AllUsers()
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}
-	return c.JSON(http.StatusOK, usr)
+	return c.JSON(http.StatusOK, user)
 }
 
 //GetUserWithID Get specific user with id
@@ -39,38 +43,27 @@ func GetUserWithID(c echo.Context) error {
 
 	id := conversion.StringToInt(str)
 
-	usr, err := model.SpecificUserWithID(id)
+	user, err := model.SpecificUserWithID(id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}
-	return c.JSON(http.StatusOK, usr)
+	return c.JSON(http.StatusOK, user)
 }
 
 //UpdateUser update user data
 func UpdateUser(c echo.Context) error {
-	var usr model.User
 
 	str := c.Param("id")
 	id := conversion.StringToInt(str)
-	usr.ID = id
 
-	values := c.QueryParams()
+	userPtr, _ := model.SpecificUserWithID(id)
+	user := *userPtr
 
-	if values.Get("username") != "" {
-		usr.Username = values.Get("username")
-	} else {
-		temp, _ := model.SpecificUserWithID(id)
-		usr.Username = temp.Username
+	if err := c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	if values.Get("password") != "" {
-		usr.Password = values.Get("password")
-	} else {
-		temp, _ := model.SpecificUserWithID(id)
-		usr.Password = temp.Password
-	}
-
-	err := model.UpdateUser(usr)
+	err := model.UpdateUser(user)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}
