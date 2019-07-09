@@ -8,25 +8,25 @@ import (
 
 //Testcase input and output of testcases
 type Testcase struct {
-	Input  string
-	Output string
+	Input  string `json:"input" form:"input"`
+	Output string `json:"output" form:"output"`
 }
 
 //Problem a problem model
 type Problem struct {
-	ID          int
-	CategoryID  int
-	Title       string
-	Description string
-	Difficulty  int
-	CreatedAt   string //time created
-	UpdatedAt   string //time updated
+	ID          int    `json:"id" form:"id"`
+	CategoryID  int    `json:"category_id" form:"category_id"`
+	Title       string `json:"title" form:"title"`
+	Description string `json:"description" form:"description"`
+	Difficulty  int    `json:"difficulty" form:"difficulty"`
+	CreatedAt   string `json:"created_at" form:"created_at"` //time created
+	UpdatedAt   string `json:"updated_at" form:"updated_at"` //time updated
 }
 
 //NewProblem add new problem
-func NewProblem(title string, categoryID int, difficulty int) error {
-	statement := `INSERT INTO problem (title,categoryID,difficulty) VALUES ($1,$2,$3)`
-	_, err := db.DB.Exec(statement, title, categoryID, difficulty)
+func NewProblem(title string, categoryID int, difficulty int, description string) error {
+	statement := `INSERT INTO problem (title,categoryID,difficulty,description) VALUES ($1,$2,$3,$4)`
+	_, err := db.DB.Exec(statement, title, categoryID, difficulty, description)
 	if err != nil {
 		return err
 	}

@@ -23,11 +23,11 @@ type Submission struct {
 //NewSubmission create a new submission
 func NewSubmission(userID int, problemID int, languageID int, src string) error {
 
-	score := 0
+	score := 0.0
 	runtime := 0.0
 	memory := 0
 
-	testcase, err := SpecificTestcaseWithID(userID)
+	testcase, err := SpecificTestcaseWithID(problemID)
 	if err != nil {
 		return err
 	}
@@ -37,14 +37,15 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 		memory += result.Memory
 		runtime += conversion.StringToFloat(result.Time)
 		if result.Status.ID == 3 {
-			score++
+			fmt.Println("hellosdf")
+			score += 1.0
 		}
 	}
 
 	length := len(testcase)
 	runtime = runtime / float64(length)
 	memory = memory / length
-	score = score / length * 100.0
+	score = score / float64(length)
 
 	statement := `INSERT INTO submission (usr_id,problem_id,lang_id,src,score,runtime,memory_usage) VALUES ($1,$2,$3,$4,$5,$6,$7)`
 	_, err = db.DB.Exec(statement, userID, problemID, languageID, src, score, runtime, memory)

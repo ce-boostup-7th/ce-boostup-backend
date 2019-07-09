@@ -3,7 +3,6 @@ package api
 import (
 	"ce-boostup-backend/conversion"
 	"ce-boostup-backend/model"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -11,22 +10,20 @@ import (
 
 //CreateProblem create a new problem
 func CreateProblem(c echo.Context) error {
-	values := c.QueryParams()
-
-	categoryID := conversion.StringToInt(values.Get("categoryID"))
-	difficulty := conversion.StringToInt(values.Get("difficulty"))
-
-	err := model.NewProblem(values.Get("title"), categoryID, difficulty)
-	if err != nil {
-		log.Fatal(err)
+	var problem model.Problem
+	if err := c.Bind(&problem); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
 	}
-
-	return c.String(http.StatusCreated, "a new problem created")
+	model.NewProblem(problem.Title, problem.CategoryID, problem.Difficulty, problem.Description)
+	return c.JSON(http.StatusCreated, "created")
 }
 
 //GetAllProblems get all problems
 func GetAllProblems(c echo.Context) error {
-	problems, _ := model.AllProblems()
+	problems, err := model.AllProblems()
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
+	}
 	return c.JSON(http.StatusOK, problems)
 }
 
@@ -38,7 +35,7 @@ func GetProblemWithID(c echo.Context) error {
 
 	problem, err := model.SpecificProblemWithID(id)
 	if err != nil {
-		return c.String(http.StatusNotFound, "not found that problem")
+		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.JSON(http.StatusOK, problem)
 }
@@ -62,17 +59,12 @@ func CreateTestcase(c echo.Context) error {
 
 	id := conversion.StringToInt(str)
 
-	values := c.QueryParams()
-
 	var testcase model.Testcase
-	testcase.Input = values.Get("input")
-	testcase.Output = values.Get("output")
-
-	err := model.NewTestcase(id, testcase)
-	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, err)
+	if err := c.Bind(&testcase); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
 	}
-	return c.JSON(http.StatusOK, "okay")
+	model.NewTestcase(id, testcase)
+	return c.JSON(http.StatusCreated, "created")
 }
 
 //UpdateProblem update problem data
