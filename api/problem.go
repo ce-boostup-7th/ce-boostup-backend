@@ -69,43 +69,14 @@ func CreateTestcase(c echo.Context) error {
 
 //UpdateProblem update problem data
 func UpdateProblem(c echo.Context) error {
-	var problem model.Problem
 
 	str := c.Param("id")
 	id := conversion.StringToInt(str)
 
-	problem.ID = id
-
-	values := c.QueryParams()
-
-	if values.Get("title") != "" {
-		problem.Title = values.Get("title")
-	} else {
-		temp, _ := model.SpecificProblemWithID(id)
-		problem.Title = temp.Title
-	}
-
-	if values.Get("description") != "" {
-		problem.Description = values.Get("description")
-	} else {
-		temp, _ := model.SpecificProblemWithID(id)
-		problem.Description = temp.Description
-	}
-
-	if values.Get("categoryID") != "" {
-		categoryID := conversion.StringToInt(values.Get("categoryID"))
-		problem.CategoryID = categoryID
-	} else {
-		temp, _ := model.SpecificProblemWithID(id)
-		problem.CategoryID = temp.CategoryID
-	}
-
-	if values.Get("difficulty") != "" {
-		difficulty := conversion.StringToInt(values.Get("difficulty"))
-		problem.Difficulty = difficulty
-	} else {
-		temp, _ := model.SpecificProblemWithID(id)
-		problem.Difficulty = temp.Difficulty
+	problemPtr, _ := model.SpecificProblemWithID(id)
+	problem := *problemPtr
+	if err := c.Bind(&problem); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	err := model.UpdateProblem(problem)
