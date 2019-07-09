@@ -1,11 +1,10 @@
 package api
 
 import (
+	"ce-boostup-backend/conversion"
 	"ce-boostup-backend/model"
-	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo"
 )
@@ -14,11 +13,8 @@ import (
 func CreateProblem(c echo.Context) error {
 	values := c.QueryParams()
 
-	//convert string to int
-	categoryID, _ := strconv.Atoi(values.Get("categoryID"))
-
-	//convert string to int
-	difficulty, _ := strconv.Atoi(values.Get("difficulty"))
+	categoryID := conversion.StringToInt(values.Get("categoryID"))
+	difficulty := conversion.StringToInt(values.Get("difficulty"))
 
 	err := model.NewProblem(values.Get("title"), categoryID, difficulty)
 	if err != nil {
@@ -38,14 +34,9 @@ func GetAllProblems(c echo.Context) error {
 func GetProblemWithID(c echo.Context) error {
 	str := c.Param("id")
 
-	//convert string to int
-	id, err := strconv.Atoi(str)
-	if err != nil {
-		log.Fatal(err)
-	}
+	id := conversion.StringToInt(str)
 
-	var problem *model.Problem
-	problem, err = model.SpecificProblemWithID(id)
+	problem, err := model.SpecificProblemWithID(id)
 	if err != nil {
 		return c.String(http.StatusNotFound, "not found that problem")
 	}
@@ -56,11 +47,7 @@ func GetProblemWithID(c echo.Context) error {
 func GetTestcaseWithID(c echo.Context) error {
 	str := c.Param("id")
 
-	//convert string to int
-	id, err := strconv.Atoi(str)
-	if err != nil {
-		log.Fatal(err)
-	}
+	id := conversion.StringToInt(str)
 
 	testcase, err := model.SpecificTestcaseWithID(id)
 	if err != nil {
@@ -73,11 +60,7 @@ func GetTestcaseWithID(c echo.Context) error {
 func CreateTestcase(c echo.Context) error {
 	str := c.Param("id")
 
-	//convert string to int
-	id, err := strconv.Atoi(str)
-	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, err)
-	}
+	id := conversion.StringToInt(str)
 
 	values := c.QueryParams()
 
@@ -85,7 +68,7 @@ func CreateTestcase(c echo.Context) error {
 	testcase.Input = values.Get("input")
 	testcase.Output = values.Get("output")
 
-	err = model.NewTestcase(id, testcase)
+	err := model.NewTestcase(id, testcase)
 	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, err)
 	}
@@ -97,11 +80,8 @@ func UpdateProblem(c echo.Context) error {
 	var problem model.Problem
 
 	str := c.Param("id")
-	//convert string to int
-	id, err := strconv.Atoi(str)
-	if err != nil {
-		log.Fatal(err)
-	}
+	id := conversion.StringToInt(str)
+
 	problem.ID = id
 
 	values := c.QueryParams()
@@ -121,7 +101,7 @@ func UpdateProblem(c echo.Context) error {
 	}
 
 	if values.Get("categoryID") != "" {
-		categoryID, _ := strconv.Atoi(values.Get("categoryID"))
+		categoryID := conversion.StringToInt(values.Get("categoryID"))
 		problem.CategoryID = categoryID
 	} else {
 		temp, _ := model.SpecificProblemWithID(id)
@@ -129,16 +109,16 @@ func UpdateProblem(c echo.Context) error {
 	}
 
 	if values.Get("difficulty") != "" {
-		difficulty, _ := strconv.Atoi(values.Get("difficulty"))
+		difficulty := conversion.StringToInt(values.Get("difficulty"))
 		problem.Difficulty = difficulty
 	} else {
 		temp, _ := model.SpecificProblemWithID(id)
 		problem.Difficulty = temp.Difficulty
 	}
 
-	err = model.UpdateProblem(problem)
+	err := model.UpdateProblem(problem)
 	if err != nil {
-		return c.String(http.StatusNotFound, "update failed")
+		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.String(http.StatusOK, "updated")
 }
@@ -147,7 +127,7 @@ func UpdateProblem(c echo.Context) error {
 func DeleteAllProblems(c echo.Context) error {
 	err := model.DeleteAllProblems()
 	if err != nil {
-		return c.String(http.StatusNotFound, "delete failed")
+		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.String(http.StatusOK, "deleted")
 }
@@ -156,16 +136,11 @@ func DeleteAllProblems(c echo.Context) error {
 func DeleteProblemWithSpecificID(c echo.Context) error {
 	str := c.Param("id")
 
-	//convert string to int
-	id, err := strconv.Atoi(str)
-	if err != nil {
-		log.Fatal(err)
-	}
+	id := conversion.StringToInt(str)
 
-	err1 := model.DeleteProblemWithSpecificID(id)
-	if err1 != nil {
-		fmt.Println(err1)
-		return c.String(http.StatusNotFound, "delete failed")
+	err := model.DeleteProblemWithSpecificID(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.String(http.StatusOK, "deleted")
 }

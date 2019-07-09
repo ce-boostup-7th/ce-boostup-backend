@@ -1,11 +1,10 @@
 package model
 
 import (
+	"ce-boostup-backend/conversion"
 	"ce-boostup-backend/db"
 	"ce-boostup-backend/judge0"
 	"fmt"
-	"log"
-	"strconv"
 )
 
 //Submission a model for submission
@@ -36,7 +35,7 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 	for i := range testcase {
 		result := judge0.Submit(src, testcase[i].Input, testcase[i].Output) //empty string is for testcase in the future
 		memory += result.Memory
-		runtime += stringToFloat(result.Time)
+		runtime += conversion.StringToFloat(result.Time)
 		if result.Status.ID == 3 {
 			score++
 		}
@@ -94,13 +93,4 @@ func SpecificSubmission(id int) (*Submission, error) {
 		return nil, err
 	}
 	return submission, nil
-}
-
-func stringToFloat(str string) float64 {
-	value, err := strconv.ParseFloat(str, 64)
-	if err != nil {
-		log.Fatal(err)
-		return 0.0
-	}
-	return value
 }

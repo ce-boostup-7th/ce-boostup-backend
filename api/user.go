@@ -1,11 +1,9 @@
 package api
 
 import (
+	"ce-boostup-backend/conversion"
 	"ce-boostup-backend/model"
-	"fmt"
-	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
@@ -17,10 +15,10 @@ func CreateUser(c echo.Context) error {
 
 	//hash a password
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(values.Get("password")), 14)
-	fmt.Println(string(bytes))
+
 	err := model.NewUser(values.Get("username"), string(bytes))
 	if err != nil {
-		log.Fatal(err)
+		return c.JSON(http.StatusNotFound, err)
 	}
 
 	return c.String(http.StatusCreated, "a new user created")
@@ -28,7 +26,10 @@ func CreateUser(c echo.Context) error {
 
 //GetAllUsers get all users info
 func GetAllUsers(c echo.Context) error {
-	usr, _ := model.AllUsers()
+	usr, err := model.AllUsers()
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
+	}
 	return c.JSON(http.StatusOK, usr)
 }
 
@@ -36,16 +37,11 @@ func GetAllUsers(c echo.Context) error {
 func GetUserWithID(c echo.Context) error {
 	str := c.Param("id")
 
-	//convert string to int
-	id, err := strconv.Atoi(str)
-	if err != nil {
-		log.Fatal(err)
-	}
+	id := conversion.StringToInt(str)
 
-	var usr *model.User
-	usr, err = model.SpecificUserWithID(id)
+	usr, err := model.SpecificUserWithID(id)
 	if err != nil {
-		return c.String(http.StatusNotFound, "not found that user")
+		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.JSON(http.StatusOK, usr)
 }
@@ -55,11 +51,7 @@ func UpdateUser(c echo.Context) error {
 	var usr model.User
 
 	str := c.Param("id")
-	//convert string to int
-	id, err := strconv.Atoi(str)
-	if err != nil {
-		log.Fatal(err)
-	}
+	id := conversion.StringToInt(str)
 	usr.ID = id
 
 	values := c.QueryParams()
@@ -78,9 +70,9 @@ func UpdateUser(c echo.Context) error {
 		usr.Password = temp.Password
 	}
 
-	err = model.UpdateUser(usr)
+	err := model.UpdateUser(usr)
 	if err != nil {
-		return c.String(http.StatusNotFound, "update failed")
+		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.String(http.StatusOK, "updated")
 }
@@ -89,7 +81,7 @@ func UpdateUser(c echo.Context) error {
 func DeleteAllUsers(c echo.Context) error {
 	err := model.DeleteAllUsers()
 	if err != nil {
-		return c.String(http.StatusNotFound, "delete failed")
+		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.String(http.StatusOK, "deleted")
 }
@@ -98,16 +90,11 @@ func DeleteAllUsers(c echo.Context) error {
 func DeleteUserWithSpecificID(c echo.Context) error {
 	str := c.Param("id")
 
-	//convert string to int
-	id, err := strconv.Atoi(str)
-	if err != nil {
-		log.Fatal(err)
-	}
+	id := conversion.StringToInt(str)
 
-	err1 := model.DeleteUserWithSpecificID(id)
-	if err1 != nil {
-		fmt.Println(err1)
-		return c.String(http.StatusNotFound, "delete failed")
+	err := model.DeleteUserWithSpecificID(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.String(http.StatusOK, "deleted")
 }
