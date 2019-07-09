@@ -63,6 +63,10 @@ func UpdateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
+	//hash a password
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	user.Password = string(bytes)
+
 	err := model.UpdateUser(user)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
