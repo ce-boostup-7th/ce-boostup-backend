@@ -17,7 +17,7 @@ type Submission struct {
 	Src          string  `json:"src" form:"src"`
 	SubmittedAt  string  `json:"submitted_at" form:"submitted_at"`
 	Score        float64 `json:"score" form:"score"`
-	Runtime      int     `json:"runtime" form:"runtime"`
+	Runtime      float64 `json:"runtime" form:"runtime"`
 	MemoryUsage  int     `json:"memory_usage" form:"memory_usage"`
 }
 
@@ -54,6 +54,31 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 		return err
 	}
 	return nil
+}
+
+// AllSubmissions get all submissions
+func AllSubmissions() ([]*Submission, error) {
+	rows, err := db.DB.Query("SELECT submission_id,src,usr_id,lang_id,submittedat,score,runtime,memory_usage FROM submission ORDER BY submission_id")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	submissions := make([]*Submission, 0)
+
+	for rows.Next() {
+		submission := new(Submission)
+
+		err := rows.Scan(&submission.SubmissionID, &submission.Src, &submission.UserID, &submission.LanguageID, &submission.SubmittedAt, &submission.Score, &submission.Runtime, &submission.MemoryUsage)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+
+		submissions = append(submissions, submission)
+	}
+
+	return submissions, nil
 }
 
 func stringToFloat(str string) float64 {

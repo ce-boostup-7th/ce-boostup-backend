@@ -16,3 +16,12 @@ func CreateSubmission(c echo.Context) error {
 	model.NewSubmission(submission.UserID, submission.ProblemID, submission.LanguageID, submission.Src)
 	return c.JSON(http.StatusCreated, "created")
 }
+
+// GetAllSubmissions get all submissions
+func GetAllSubmissions(c echo.Context) error {
+	submissions, err := model.AllSubmissions()
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
+	}
+	return c.JSON(http.StatusOK, submissions)
+}

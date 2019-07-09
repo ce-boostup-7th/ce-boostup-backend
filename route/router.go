@@ -41,6 +41,7 @@ func Init() *echo.Echo {
 	e.POST("/problems/testcases/:id", api.CreateTestcase)
 
 	//submission routes
+	e.GET("/submissions", api.GetAllSubmissions)
 	e.POST("/submissions", api.CreateSubmission)
 
 	// Restricted group
