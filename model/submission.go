@@ -37,7 +37,6 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 		memory += result.Memory
 		runtime += conversion.StringToFloat(result.Time)
 		if result.Status.ID == 3 {
-			fmt.Println("hellosdf")
 			score += 1.0
 		}
 	}
@@ -50,9 +49,10 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 	statement := `INSERT INTO submission (usr_id,problem_id,lang_id,src,score,runtime,memory_usage) VALUES ($1,$2,$3,$4,$5,$6,$7)`
 	_, err = db.DB.Exec(statement, userID, problemID, languageID, src, score, runtime, memory)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
+	collectScore(userID)
+
 	return nil
 }
 
@@ -71,7 +71,6 @@ func AllSubmissions() ([]*Submission, error) {
 
 		err := rows.Scan(&submission.SubmissionID, &submission.Src, &submission.UserID, &submission.ProblemID, &submission.LanguageID, &submission.SubmittedAt, &submission.Score, &submission.Runtime, &submission.MemoryUsage)
 		if err != nil {
-			fmt.Println(err)
 			return nil, err
 		}
 
@@ -94,4 +93,23 @@ func SpecificSubmission(id int) (*Submission, error) {
 		return nil, err
 	}
 	return submission, nil
+}
+
+// DeleteAllSubmissions cleans all submission
+func DeleteAllSubmissions() error {
+	statement := `DELETE FROM submission; ALTER SEQUENCE submission_submission_id_seq RESTART WITH 1;`
+	_, err := db.DB.Exec(statement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func collectScore(id int) error {
+	statement := `UPDATE grader_user SET score=(SELECT SUM(max) FROM (SELECT problem_id,MAX(score) FROM submission WHERE usr_id=$1 GROUP BY submission.problem_id) AS PREP) WHERE id=$1;`
+	_, err := db.DB.Exec(statement, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

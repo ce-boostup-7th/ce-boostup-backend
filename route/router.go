@@ -44,6 +44,7 @@ func Init() *echo.Echo {
 	e.GET("/submissions", api.GetAllSubmissions)
 	e.GET("/submissions/:id", api.GetSubmissionWithID)
 	e.POST("/submissions", api.CreateSubmission)
+	e.DELETE("/submissions", api.DeleteAllSubmissions)
 
 	// Restricted group
 	r := e.Group("/restricted")

@@ -40,3 +40,12 @@ func GetSubmissionWithID(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, submission)
 }
+
+// DeleteAllSubmissions delete all submissions
+func DeleteAllSubmissions(c echo.Context) error {
+	err := model.DeleteAllSubmissions()
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
+	}
+	return c.String(http.StatusOK, "deleted")
+}
