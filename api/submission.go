@@ -34,7 +34,7 @@ func CreateSubmission(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	userIDStr := fmt.Sprintf("%v", claims["name"])
+	userIDStr := fmt.Sprintf("%v", claims["userID"])
 	userID := conversion.StringToInt(userIDStr)
 
 	model.NewSubmission(userID, submission.ProblemID, submission.LanguageID, submission.Src)
