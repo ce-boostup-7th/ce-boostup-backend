@@ -3,8 +3,10 @@ package judge0
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 type request struct {
@@ -27,7 +29,7 @@ var client = &http.Client{}
 
 // Submit a source code from submission to Judge0 api
 func Submit(source, input, expectedOutput string) *Result {
-	url := "http://161.246.34.95:4000/submissions?wait=true"
+	url := fmt.Sprintf("http://%s:%s/submissions?wait=true", os.Getenv("JUDGE_0_IP"), os.Getenv("JUDGE_0_PORT"))
 
 	req := map[string]string{"source_code": source, "stdin": input, "language_id": "34", "expected_output": expectedOutput}
 
