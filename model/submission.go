@@ -95,6 +95,16 @@ func SpecificSubmission(id int) (*Submission, error) {
 	return submission, nil
 }
 
+// DeleteAllSubmissions cleans all submission
+func DeleteAllSubmissions() error {
+	statement := `DELETE FROM submission; ALTER SEQUENCE submission_submission_id_seq RESTART WITH 1;`
+	_, err := db.DB.Exec(statement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func collectScore(id int) error {
 	statement := `UPDATE grader_user SET score=(SELECT SUM(max) FROM (SELECT problem_id,MAX(score) FROM submission WHERE usr_id=$1 GROUP BY submission.problem_id) AS PREP) WHERE id=$1;`
 	_, err := db.DB.Exec(statement, id)
