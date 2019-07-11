@@ -106,3 +106,16 @@ func PasswordByUsername(username string) (*string, error) {
 	}
 	return &password, nil
 }
+
+//IDByUsername get user id by username
+func IDByUsername(username string) (*int, error) {
+	statement := `SELECT id FROM grader_user WHERE username=$1`
+	row := db.DB.QueryRow(statement, username)
+
+	var id int
+	err := row.Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
+}
