@@ -25,9 +25,14 @@ func Login(c echo.Context) error {
 	// Create token
 	token := jwt.New(jwt.SigningMethodHS256)
 
+	userID, err := model.IDByUsername(username)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, err)
+	}
+
 	//Set claims
 	claims := token.Claims.(jwt.MapClaims)
-	claims["name"] = username
+	claims["name"] = userID
 	claims["admin"] = true
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
@@ -38,7 +43,7 @@ func Login(c echo.Context) error {
 	}
 
 	cookie := new(http.Cookie)
-	cookie.Name = "JWT Token"
+	cookie.Name = "JWT_Token"
 	cookie.Value = t
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	c.SetCookie(cookie)

@@ -3,7 +3,11 @@ package api
 import (
 	"ce-boostup-backend/conversion"
 	"ce-boostup-backend/model"
+	"fmt"
 	"net/http"
+	"os"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"github.com/labstack/echo"
 )
@@ -14,7 +18,26 @@ func CreateSubmission(c echo.Context) error {
 	if err := c.Bind(&submission); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
-	model.NewSubmission(submission.UserID, submission.ProblemID, submission.LanguageID, submission.Src)
+
+	// read a cookie
+	cookie, err := c.Cookie("JWT_Token")
+	if err != nil {
+		return err
+	}
+
+	jwtString := cookie.Value
+	claims := jwt.MapClaims{}
+	_, err = jwt.ParseWithClaims(jwtString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("SECRET_KEY")), nil
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	userIDStr := fmt.Sprintf("%v", claims["name"])
+	userID := conversion.StringToInt(userIDStr)
+
+	model.NewSubmission(userID, submission.ProblemID, submission.LanguageID, submission.Src)
 	return c.JSON(http.StatusCreated, "created")
 }
 
