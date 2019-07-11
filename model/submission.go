@@ -51,6 +51,7 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 	if err != nil {
 		return err
 	}
+	collectScore(userID)
 
 	return nil
 }
@@ -70,7 +71,6 @@ func AllSubmissions() ([]*Submission, error) {
 
 		err := rows.Scan(&submission.SubmissionID, &submission.Src, &submission.UserID, &submission.ProblemID, &submission.LanguageID, &submission.SubmittedAt, &submission.Score, &submission.Runtime, &submission.MemoryUsage)
 		if err != nil {
-			fmt.Println(err)
 			return nil, err
 		}
 
@@ -93,4 +93,13 @@ func SpecificSubmission(id int) (*Submission, error) {
 		return nil, err
 	}
 	return submission, nil
+}
+
+func collectScore(id int) error {
+	statement := `UPDATE grader_user SET score=(SELECT SUM(max) FROM (SELECT problem_id,MAX(score) FROM submission WHERE usr_id=$1 GROUP BY submission.problem_id) AS PREP) WHERE id=$1;`
+	_, err := db.DB.Exec(statement, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
