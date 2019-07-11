@@ -34,7 +34,7 @@ func Login(c echo.Context) error {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["name"] = userID
 	claims["admin"] = true
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
 	//Generate encoded token and send it as response
 	t, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
