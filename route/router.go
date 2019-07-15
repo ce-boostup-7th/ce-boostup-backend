@@ -2,6 +2,7 @@ package route
 
 import (
 	"ce-boostup-backend/api"
+	"net/http"
 
 	"github.com/labstack/echo/middleware"
 
@@ -11,6 +12,12 @@ import (
 //Init init a router for api
 func Init() *echo.Echo {
 	e := echo.New()
+
+	// config CORS
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:1234"},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+	}))
 
 	// Middleware
 	e.Use(middleware.Logger())
