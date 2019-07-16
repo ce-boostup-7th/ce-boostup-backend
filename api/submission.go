@@ -22,7 +22,7 @@ func CreateSubmission(c echo.Context) error {
 	// read a cookie
 	cookie, err := c.Cookie("JWT_Token")
 	if err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	jwtString := cookie.Value

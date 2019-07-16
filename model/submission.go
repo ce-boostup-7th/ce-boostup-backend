@@ -15,7 +15,8 @@ type Submission struct {
 	LanguageID   int     `json:"language_id" form:"language_id"`
 	Src          string  `json:"src" form:"src"`
 	SubmittedAt  string  `json:"submitted_at" form:"submitted_at"`
-	Score        float64 `json:"score" form:"score"`
+	Score        int     `json:"score" form:"score"`
+	MaxScore     int     `json:"max_score" form:"max_score"`
 	Runtime      float64 `json:"runtime" form:"runtime"`
 	MemoryUsage  int     `json:"memory_usage" form:"memory_usage"`
 }
@@ -23,7 +24,7 @@ type Submission struct {
 //NewSubmission create a new submission
 func NewSubmission(userID int, problemID int, languageID int, src string) error {
 
-	score := 0.0
+	score := 0
 	runtime := 0.0
 	memory := 0
 
@@ -37,17 +38,16 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 		memory += result.Memory
 		runtime += conversion.StringToFloat(result.Time)
 		if result.Status.ID == 3 {
-			score += 1.0
+			score++
 		}
 	}
 
 	length := len(testcase)
 	runtime = runtime / float64(length)
 	memory = memory / length
-	score = score / float64(length)
 
-	statement := `INSERT INTO submission (usr_id,problem_id,lang_id,src,score,runtime,memory_usage) VALUES ($1,$2,$3,$4,$5,$6,$7)`
-	_, err = db.DB.Exec(statement, userID, problemID, languageID, src, score, runtime, memory)
+	statement := `INSERT INTO submission (usr_id,problem_id,lang_id,src,score,runtime,memory_usage,max_score) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`
+	_, err = db.DB.Exec(statement, userID, problemID, languageID, src, score, runtime, memory, length)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 
 // AllSubmissions get all submissions
 func AllSubmissions() ([]*Submission, error) {
-	rows, err := db.DB.Query("SELECT submission_id,src,usr_id,problem_id,lang_id,submittedat,score,runtime,memory_usage FROM submission ORDER BY submission_id")
+	rows, err := db.DB.Query("SELECT submission_id,src,usr_id,problem_id,lang_id,submittedat,score,max_score,runtime,memory_usage FROM submission ORDER BY submission_id")
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func AllSubmissions() ([]*Submission, error) {
 	for rows.Next() {
 		submission := new(Submission)
 
-		err := rows.Scan(&submission.SubmissionID, &submission.Src, &submission.UserID, &submission.ProblemID, &submission.LanguageID, &submission.SubmittedAt, &submission.Score, &submission.Runtime, &submission.MemoryUsage)
+		err := rows.Scan(&submission.SubmissionID, &submission.Src, &submission.UserID, &submission.ProblemID, &submission.LanguageID, &submission.SubmittedAt, &submission.Score, &submission.MaxScore, &submission.Runtime, &submission.MemoryUsage)
 		if err != nil {
 			return nil, err
 		}
