@@ -28,6 +28,7 @@ func Init() *echo.Echo {
 
 	//login route
 	e.POST("/login", api.Login)
+	e.POST("/logout", api.Logout)
 
 	//user routes
 	e.GET("/users", api.GetAllUsers)
