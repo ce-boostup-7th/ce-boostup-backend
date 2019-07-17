@@ -50,6 +50,33 @@ func GetAllSubmissions(c echo.Context) error {
 	return c.JSON(http.StatusOK, submissions)
 }
 
+//GetAllSubmissionsOfUser get all submissions of specific user
+func GetAllSubmissionsOfUser(c echo.Context) error {
+	// read a cookie
+	cookie, err := c.Cookie("JWT_Token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	jwtString := cookie.Value
+	claims := jwt.MapClaims{}
+	_, err = jwt.ParseWithClaims(jwtString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("SECRET_KEY")), nil
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	userIDStr := fmt.Sprintf("%v", claims["userID"])
+	userID := conversion.StringToInt(userIDStr)
+
+	problems, err := model.AllSubmissionsFilteredByUserID(userID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
+	}
+	return c.JSON(http.StatusOK, problems)
+}
+
 // GetSubmissionWithID get a specific submission by id
 func GetSubmissionWithID(c echo.Context) error {
 	str := c.Param("id")

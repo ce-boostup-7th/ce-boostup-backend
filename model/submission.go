@@ -80,6 +80,30 @@ func AllSubmissions() ([]*Submission, error) {
 	return submissions, nil
 }
 
+//AllSubmissionsFilteredByUserID filter all user that filtered by userID
+func AllSubmissionsFilteredByUserID(uid int) ([]*Submission, error) {
+	rows, err := db.DB.Query("SELECT submission_id,src,usr_id,problem_id,lang_id,submittedat,score,max_score,runtime,memory_usage FROM submission WHERE usr_id=$1 ORDER BY submission_id", uid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	submissions := make([]*Submission, 0)
+
+	for rows.Next() {
+		submission := new(Submission)
+
+		err := rows.Scan(&submission.SubmissionID, &submission.Src, &submission.UserID, &submission.ProblemID, &submission.LanguageID, &submission.SubmittedAt, &submission.Score, &submission.MaxScore, &submission.Runtime, &submission.MemoryUsage)
+		if err != nil {
+			return nil, err
+		}
+
+		submissions = append(submissions, submission)
+	}
+
+	return submissions, nil
+}
+
 // SpecificSubmission return a specific submission by id
 func SpecificSubmission(id int) (*Submission, error) {
 	statement := `SELECT submission_id,src,usr_id,problem_id,lang_id,submittedat,score,runtime,memory_usage  FROM submission WHERE submission_id=$1`
