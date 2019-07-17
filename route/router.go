@@ -26,7 +26,7 @@ func Init() *echo.Echo {
 	// Home
 	e.GET("/", api.Home)
 
-	//login route
+	//login&logout route
 	e.POST("/login", api.Login)
 	e.POST("/logout", api.Logout)
 
@@ -53,6 +53,9 @@ func Init() *echo.Echo {
 	e.GET("/submissions/:id", api.GetSubmissionWithID)
 	e.POST("/submissions", api.CreateSubmission)
 	e.DELETE("/submissions", api.DeleteAllSubmissions)
+
+	//special
+	e.GET("/users/stats", api.GetUserStats)
 
 	// Restricted group
 	r := e.Group("/restricted")
