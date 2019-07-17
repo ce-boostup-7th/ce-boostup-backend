@@ -55,7 +55,7 @@ func Init() *echo.Echo {
 	e.DELETE("/submissions", api.DeleteAllSubmissions)
 
 	//special
-	e.GET("/users/stats/:id", api.GetUserStats)
+	e.GET("/users/stats", api.GetUserStats)
 
 	// Restricted group
 	r := e.Group("/restricted")
