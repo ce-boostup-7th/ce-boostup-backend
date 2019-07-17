@@ -74,23 +74,27 @@ func SpecificUserStatWithID(id int) (*Statistic, error) {
 	overall.Name = "completed"
 	overallSubmissions = append(overallSubmissions, overall)
 
+	completed := overall.Amount
+	var temp int
 	overall = new(OverallSubmission)
-	statement = `SELECT COUNT(distinct problem_id) FROM submission WHERE score!=max_score AND usr_id=$1 HAVING COUNT(submission_id)>0;`
+	statement = `SELECT COUNT(distinct problem_id) FROM submission WHERE usr_id=$1 HAVING COUNT(submission_id) > 0;`
 	row = db.DB.QueryRow(statement, id)
-	row.Scan(&overall.Amount)
-	if &overall.Amount == nil {
-		overall.Amount = 0
+	row.Scan(&temp)
+	if &temp == nil {
+		temp = 0
 	}
+	overall.Amount = temp - completed
 	overall.Name = "working"
 	overallSubmissions = append(overallSubmissions, overall)
 
 	overall = new(OverallSubmission)
-	statement = `SELECT COUNT(distinct problem_id) FROM submission WHERE usr_id=$1 HAVING COUNT(submission_id) = 0;`
+	statement = `SELECT COUNT(distinct problem_id) FROM submission WHERE usr_id=$1 HAVING COUNT(submission_id) > 0;`
 	row = db.DB.QueryRow(statement, id)
-	row.Scan(&overall.Amount)
-	if &overall.Amount == nil {
-		overall.Amount = 0
+	row.Scan(&temp)
+	if &temp == nil {
+		temp = 0
 	}
+	overall.Amount = countAllProblems() - temp
 	overall.Name = "not started"
 	overallSubmissions = append(overallSubmissions, overall)
 

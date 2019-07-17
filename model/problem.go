@@ -140,3 +140,11 @@ func seperateString(str string, str1 *string, str2 *string) {
 	s := strings.Split(str, ",")
 	*str1, *str2 = s[0], s[1]
 }
+
+func countAllProblems() int {
+	var count int
+	statement := "SELECT COUNT(*) FROM problem;"
+	row := db.DB.QueryRow(statement)
+	row.Scan(&count)
+	return count
+}
