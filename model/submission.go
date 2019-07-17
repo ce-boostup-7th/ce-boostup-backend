@@ -1,9 +1,9 @@
 package model
 
 import (
-	"../conversion"
-	"../db"
-	"../judge0"
+	"ce-boostup-backend/conversion"
+	"ce-boostup-backend/db"
+	"ce-boostup-backend/judge0"
 	"fmt"
 )
 

@@ -1,7 +1,7 @@
 package model
 
 import (
-	"../db"
+	"ce-boostup-backend/db"
 	"fmt"
 	"strings"
 )

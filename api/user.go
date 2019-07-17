@@ -1,8 +1,8 @@
 package api
 
 import (
-	"../conversion"
-	"../model"
+	"ce-boostup-backend/conversion"
+	"ce-boostup-backend/model"
 	"net/http"
 
 	"github.com/labstack/echo"
