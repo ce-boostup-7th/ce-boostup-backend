@@ -1,8 +1,8 @@
 package main
 
 import (
-	"ce-boostup-backend/db"
-	"ce-boostup-backend/route"
+	"./db"
+	"./route"
 	"log"
 
 	"github.com/joho/godotenv"
