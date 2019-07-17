@@ -54,6 +54,8 @@ func Init() *echo.Echo {
 	e.POST("/submissions", api.CreateSubmission)
 	e.DELETE("/submissions", api.DeleteAllSubmissions)
 
+	e.GET("/users/submissions", api.GetAllSubmissionsOfUser)
+
 	//special
 	e.GET("/users/stats", api.GetUserStats)
 
