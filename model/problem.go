@@ -119,7 +119,7 @@ func UpdateProblem(problem Problem) error {
 
 //DeleteAllProblems cleans all problem
 func DeleteAllProblems() error {
-	statement := "DELETE FROM problem; ALTER SEQUENCE problem_id_seq RESTART WITH 1;"
+	statement := "DELETE FROM problem;"
 	_, err := db.DB.Exec(statement)
 	if err != nil {
 		return err
@@ -129,7 +129,7 @@ func DeleteAllProblems() error {
 
 //DeleteProblemWithSpecificID delete problem by id
 func DeleteProblemWithSpecificID(id int) error {
-	statement := fmt.Sprintf("DELETE FROM problem WHERE id=%d ; ALTER SEQUENCE problem_id_seq RESTART WITH 1;", id)
+	statement := fmt.Sprintf("DELETE FROM problem WHERE id=%d ;", id)
 	_, err := db.DB.Exec(statement)
 	if err != nil {
 		return err

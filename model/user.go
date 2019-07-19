@@ -75,7 +75,7 @@ func UpdateUser(usr User) error {
 
 //DeleteAllUsers clean user
 func DeleteAllUsers() error {
-	statement := "DELETE FROM grader_user; ALTER SEQUENCE grader_user_id_seq RESTART WITH 1;"
+	statement := "DELETE FROM grader_user;"
 	_, err := db.DB.Exec(statement)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func DeleteAllUsers() error {
 
 //DeleteUserWithSpecificID delete user by id
 func DeleteUserWithSpecificID(id int) error {
-	statement := fmt.Sprintf("DELETE FROM grader_user WHERE id=%d ; ALTER SEQUENCE grader_user_id_seq RESTART WITH 1;", id)
+	statement := fmt.Sprintf("DELETE FROM grader_user WHERE id=%d ;", id)
 	_, err := db.DB.Exec(statement)
 
 	if err != nil {
