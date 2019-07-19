@@ -121,7 +121,7 @@ func SpecificSubmission(id int) (*Submission, error) {
 
 // DeleteAllSubmissions cleans all submission
 func DeleteAllSubmissions() error {
-	statement := `DELETE FROM submission; ALTER SEQUENCE submission_submission_id_seq RESTART WITH 1;`
+	statement := `DELETE FROM submission;`
 	_, err := db.DB.Exec(statement)
 	if err != nil {
 		return err
