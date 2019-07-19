@@ -24,13 +24,16 @@ type Problem struct {
 }
 
 //NewProblem add new problem
-func NewProblem(title string, categoryID int, difficulty int, description string) error {
-	statement := `INSERT INTO problem (title,categoryID,difficulty,description) VALUES ($1,$2,$3,$4)`
-	_, err := db.DB.Exec(statement, title, categoryID, difficulty, description)
+func NewProblem(title string, categoryID int, difficulty int, description string) (*int, error) {
+	var problemID int
+
+	statement := `INSERT INTO problem (title,categoryID,difficulty,description) VALUES ($1,$2,$3,$4) RETURNING id`
+	row := db.DB.QueryRow(statement, title, categoryID, difficulty, description)
+	err := row.Scan(&problemID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &problemID, nil
 }
 
 //AllProblems return all problems in db
