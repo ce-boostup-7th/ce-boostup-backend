@@ -32,6 +32,10 @@ var client = &http.Client{}
 func Submit(langID int, source, input, expectedOutput string) *Result {
 	url := fmt.Sprintf("http://%s:%s/submissions?wait=true", os.Getenv("JUDGE_0_IP"), os.Getenv("JUDGE_0_PORT"))
 
+	// remove quotes
+	input = input[1 : len(input)-1]
+	expectedOutput = expectedOutput[1 : len(expectedOutput)-1]
+
 	req := map[string]string{"source_code": source, "stdin": input, "language_id": strconv.Itoa(langID), "expected_output": expectedOutput}
 
 	//convert request to io.Reader

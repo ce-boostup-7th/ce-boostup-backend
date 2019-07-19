@@ -100,7 +100,7 @@ func SpecificTestcaseWithID(id int) ([]*Testcase, error) {
 // NewTestcase add a new testcase with just input and we'll get output of testcase by using Judge0
 func NewTestcase(id int, testcase Testcase) error {
 	statement := `UPDATE problem SET testcase=array_append(testcase,($1,$2)::TESTCASE) WHERE id=$3`
-	_, err := db.DB.Exec(statement, testcase.Input, testcase.Output, id)
+	_, err := db.DB.Exec(statement, testcase.Input+" ", testcase.Output+" ", id)
 	if err != nil {
 		return err
 	}
