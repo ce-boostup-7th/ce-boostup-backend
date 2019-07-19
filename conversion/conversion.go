@@ -18,7 +18,6 @@ func StringToInt(str string) int {
 func StringToFloat(str string) float64 {
 	value, err := strconv.ParseFloat(str, 64)
 	if err != nil {
-		log.Fatal(err)
 		return 0.0
 	}
 	return value

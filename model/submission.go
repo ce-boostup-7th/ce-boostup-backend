@@ -34,7 +34,7 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 	}
 
 	for i := range testcase {
-		result := judge0.Submit(src, testcase[i].Input, testcase[i].Output) //empty string is for testcase in the future
+		result := judge0.Submit(languageID, src, testcase[i].Input, testcase[i].Output) //empty string is for testcase in the future
 		memory += result.Memory
 		runtime += conversion.StringToFloat(result.Time)
 		if result.Status.ID == 3 {
