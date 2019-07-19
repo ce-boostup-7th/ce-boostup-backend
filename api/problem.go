@@ -3,7 +3,6 @@ package api
 import (
 	"ce-boostup-backend/conversion"
 	"ce-boostup-backend/model"
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -17,7 +16,6 @@ func CreateProblem(c echo.Context) error {
 	}
 	id, err := model.NewProblem(problem.Title, problem.CategoryID, problem.Difficulty, problem.Description)
 	if err != nil {
-		fmt.Println(err)
 		return c.JSON(http.StatusBadRequest, err)
 	}
 	return c.JSON(http.StatusCreated, id)
