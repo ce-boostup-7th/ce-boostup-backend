@@ -15,7 +15,7 @@ func Init() *echo.Echo {
 
 	// config CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:1234"},
+		AllowOrigins: []string{"http://localhost:1234", "http://problem-injector.surge.sh"},
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
 
