@@ -4,6 +4,8 @@ import (
 	"../db"
 )
 
+// ---------- OU version ----------
+
 //IDPasswordByUsername get password by username
 func IDPasswordByUsername(username string) (*int, *string, error) {
 	statement := `SELECT id, password FROM public.grader_user WHERE username=$1`

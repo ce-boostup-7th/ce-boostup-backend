@@ -78,6 +78,13 @@ func Init() *echo.Echo {
 	e.PUT("/ou/problems/:id/testcases/:index", api.OuUpdateTestcase)
 	e.DELETE("/ou/problems/:id/testcases/:index", api.OuDeleteTestcase)
 
+	//submission routes
+	e.POST("/ou/submissions", api.OuCreateSubmission)
+	e.GET("/ou/submissions", api.OuGetAllSubmissions)
+	e.GET("/ou/submissions/:id", api.OuGetSubmissionWithID)
+
+	e.GET("/ou/users/submissions", api.OuGetAllSubmissionsOfUser)
+
 	// Restricted group
 	r := e.Group("/restricted")
 	r.Use(middleware.JWT([]byte("secret")))

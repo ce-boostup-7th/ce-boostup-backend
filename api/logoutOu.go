@@ -7,6 +7,8 @@ import (
 	"github.com/labstack/echo"
 )
 
+// ---------- OU version ----------
+
 // OuLogout log out
 func OuLogout(c echo.Context) error {
 
