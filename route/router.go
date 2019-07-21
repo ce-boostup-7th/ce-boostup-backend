@@ -64,6 +64,7 @@ func Init() *echo.Echo {
 
 	// login&logout route
 	e.POST("/ou/login", api.OuLogin)
+	e.POST("/ou/logout", api.OuLogout)
 
 	//problem routes
 	e.POST("/ou/problems", api.OuCreateProblem)
