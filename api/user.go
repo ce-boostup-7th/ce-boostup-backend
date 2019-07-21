@@ -41,7 +41,7 @@ func GetAllUsers(c echo.Context) error {
 func GetUserWithID(c echo.Context) error {
 	str := c.Param("id")
 
-	id := conversion.StringToInt(str)
+	id, _ := conversion.StringToInt(str)
 
 	user, err := model.SpecificUserWithID(id)
 	if err != nil {
@@ -54,7 +54,7 @@ func GetUserWithID(c echo.Context) error {
 func UpdateUser(c echo.Context) error {
 
 	str := c.Param("id")
-	id := conversion.StringToInt(str)
+	id, _ := conversion.StringToInt(str)
 
 	userPtr, _ := model.SpecificUserWithID(id)
 	user := *userPtr
@@ -87,7 +87,7 @@ func DeleteAllUsers(c echo.Context) error {
 func DeleteUserWithSpecificID(c echo.Context) error {
 	str := c.Param("id")
 
-	id := conversion.StringToInt(str)
+	id, _ := conversion.StringToInt(str)
 
 	err := model.DeleteUserWithSpecificID(id)
 	if err != nil {

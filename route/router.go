@@ -60,6 +60,20 @@ func Init() *echo.Echo {
 	//special
 	e.GET("/users/stats", api.GetUserStats)
 
+	// ---------- OU version ----------
+
+	//problem routes
+	e.POST("/ou/problems", api.OuCreateProblem)
+	e.GET("/ou/problems", api.OuGetAllProblems)
+	e.GET("/ou/problems/:id", api.OuGetProblemWithID)
+	e.PUT("/ou/problems/:id", api.OuUpdateProblem)
+	e.DELETE("/ou/problems/:id", api.OuDeleteProblemWithSpecificID)
+
+	e.GET("/ou/problems/:id/testcases", api.OuGetTestcaseWithID)
+	e.POST("/ou/problems/:id/testcases", api.OuCreateTestcase)
+	e.PUT("/ou/problems/:id/testcases/:index", api.OuUpdateTestcase)
+	e.DELETE("/ou/problems/:id/testcases/:index", api.OuDeleteTestcase)
+
 	// Restricted group
 	r := e.Group("/restricted")
 	r.Use(middleware.JWT([]byte("secret")))

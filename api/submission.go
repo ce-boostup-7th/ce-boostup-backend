@@ -35,7 +35,7 @@ func CreateSubmission(c echo.Context) error {
 	}
 
 	userIDStr := fmt.Sprintf("%v", claims["userID"])
-	userID := conversion.StringToInt(userIDStr)
+	userID, _ := conversion.StringToInt(userIDStr)
 
 	model.NewSubmission(userID, submission.ProblemID, submission.LanguageID, submission.Src)
 	return c.JSON(http.StatusCreated, "created")
@@ -68,7 +68,7 @@ func GetAllSubmissionsOfUser(c echo.Context) error {
 	}
 
 	userIDStr := fmt.Sprintf("%v", claims["userID"])
-	userID := conversion.StringToInt(userIDStr)
+	userID, _ := conversion.StringToInt(userIDStr)
 
 	problems, err := model.AllSubmissionsFilteredByUserID(userID)
 	if err != nil {
@@ -81,7 +81,7 @@ func GetAllSubmissionsOfUser(c echo.Context) error {
 func GetSubmissionWithID(c echo.Context) error {
 	str := c.Param("id")
 
-	id := conversion.StringToInt(str)
+	id, _ := conversion.StringToInt(str)
 
 	var submission *model.Submission
 	submission, err := model.SpecificSubmission(id)
