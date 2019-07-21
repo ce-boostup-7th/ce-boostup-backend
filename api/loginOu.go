@@ -19,7 +19,7 @@ func OuLogin(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	hashedPassword, err := model.PasswordByUsername(username)
+	userID, hashedPassword, err := model.IDPasswordByUsername(username)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "Incorrect Username or Password")
 	}
@@ -30,16 +30,12 @@ func OuLogin(c echo.Context) error {
 
 	// Create token
 	token := jwt.New(jwt.SigningMethodHS256)
-
-	userID, err := model.IDByUsername(username)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "contact admin")
-	}
+	endTime := time.Now().Add(time.Hour * 24)
 
 	//Set claims
 	claims := token.Claims.(jwt.MapClaims)
 	claims["userID"] = userID
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	claims["exp"] = endTime.Unix()
 
 	//Generate encoded token and send it as response
 	t, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
@@ -51,7 +47,7 @@ func OuLogin(c echo.Context) error {
 	cookie.HttpOnly = false
 	cookie.Name = "JWT_Token"
 	cookie.Value = t
-	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.Expires = endTime
 	c.SetCookie(cookie)
 
 	return c.String(http.StatusOK, "logged in")
