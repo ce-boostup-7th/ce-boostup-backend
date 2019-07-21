@@ -15,7 +15,7 @@ func Init() *echo.Echo {
 
 	// config CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:1234", "http://problem-injector.surge.sh"},
+		AllowOrigins:     []string{"http://localhost:1234", "http://problem-injector.surge.sh", "https://gracious-ritchie-196af9.netlify.com/"},
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 		AllowCredentials: true,
 	}))
@@ -61,6 +61,9 @@ func Init() *echo.Echo {
 	e.GET("/users/stats", api.GetUserStats)
 
 	// ---------- OU version ----------
+
+	// login&logout route
+	e.POST("/ou/login", api.OuLogin)
 
 	//problem routes
 	e.POST("/ou/problems", api.OuCreateProblem)
