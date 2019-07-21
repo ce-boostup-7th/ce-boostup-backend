@@ -1,7 +1,7 @@
 package api
 
 import (
-	"ce-boostup-backend/model"
+	"../model"
 	"net/http"
 	"os"
 	"time"

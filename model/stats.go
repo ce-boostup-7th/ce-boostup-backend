@@ -1,7 +1,7 @@
 package model
 
 import (
-	"ce-boostup-backend/db"
+	"../db"
 )
 
 //Statistic a stat of grader user
