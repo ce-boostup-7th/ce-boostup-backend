@@ -251,7 +251,7 @@ func OuCreateTestcase(c echo.Context) error {
 			Err: err,
 		})
 	}
-	err = model.NewTestcase(id, *testcase)
+	err = model.OuNewTestcase(id, *testcase)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &RespError{
 			Msg:  "Can not create new testcase",
