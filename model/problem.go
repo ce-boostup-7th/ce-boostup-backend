@@ -1,7 +1,7 @@
 package model
 
 import (
-	"../db"
+	"ce-boostup-backend/db"
 	"fmt"
 	"strings"
 )
@@ -24,13 +24,16 @@ type Problem struct {
 }
 
 //NewProblem add new problem
-func NewProblem(title string, categoryID int, difficulty int, description string) error {
-	statement := `INSERT INTO problem (title,categoryID,difficulty,description) VALUES ($1,$2,$3,$4)`
-	_, err := db.DB.Exec(statement, title, categoryID, difficulty, description)
+func NewProblem(title string, categoryID int, difficulty int, description string) (*int, error) {
+	var problemID int
+
+	statement := `INSERT INTO problem (title,categoryID,difficulty,description) VALUES ($1,$2,$3,$4) RETURNING id`
+	row := db.DB.QueryRow(statement, title, categoryID, difficulty, description)
+	err := row.Scan(&problemID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &problemID, nil
 }
 
 //AllProblems return all problems in db
@@ -97,7 +100,7 @@ func SpecificTestcaseWithID(id int) ([]*Testcase, error) {
 // NewTestcase add a new testcase with just input and we'll get output of testcase by using Judge0
 func NewTestcase(id int, testcase Testcase) error {
 	statement := `UPDATE problem SET testcase=array_append(testcase,($1,$2)::TESTCASE) WHERE id=$3`
-	_, err := db.DB.Exec(statement, testcase.Input, testcase.Output, id)
+	_, err := db.DB.Exec(statement, testcase.Input+" ", testcase.Output+" ", id)
 	if err != nil {
 		return err
 	}
@@ -116,7 +119,7 @@ func UpdateProblem(problem Problem) error {
 
 //DeleteAllProblems cleans all problem
 func DeleteAllProblems() error {
-	statement := "DELETE FROM problem; ALTER SEQUENCE problem_id_seq RESTART WITH 1;"
+	statement := "DELETE FROM problem;"
 	_, err := db.DB.Exec(statement)
 	if err != nil {
 		return err
@@ -126,7 +129,7 @@ func DeleteAllProblems() error {
 
 //DeleteProblemWithSpecificID delete problem by id
 func DeleteProblemWithSpecificID(id int) error {
-	statement := fmt.Sprintf("DELETE FROM problem WHERE id=%d ; ALTER SEQUENCE problem_id_seq RESTART WITH 1;", id)
+	statement := fmt.Sprintf("DELETE FROM problem WHERE id=%d ;", id)
 	_, err := db.DB.Exec(statement)
 	if err != nil {
 		return err
@@ -139,4 +142,12 @@ func seperateString(str string, str1 *string, str2 *string) {
 	str = strings.Replace(str, ")", "", 1)
 	s := strings.Split(str, ",")
 	*str1, *str2 = s[0], s[1]
+}
+
+func countAllProblems() int {
+	var count int
+	statement := "SELECT COUNT(*) FROM problem;"
+	row := db.DB.QueryRow(statement)
+	row.Scan(&count)
+	return count
 }
