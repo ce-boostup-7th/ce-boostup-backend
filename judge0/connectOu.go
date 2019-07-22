@@ -5,17 +5,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 )
 
 // ---------- OU version ----------
 
+// OuResult from Judge0 api
+type OuResult struct {
+	Time			string 	`json:"time"`
+	Memory			int    	`json:"memory"`
+	CompileOutput	string	`json:"compile_output"`
+	Status struct {
+		ID int `json:"id"` // 3 for correct 4 for incorrect
+	} `json:"status"`
+}
+
 // OuSubmit a source code from submission to Judge0 api
-func OuSubmit(langID int, source, input, expectedOutput string) *Result {
-	var client = &http.Client{}
-	
+func OuSubmit(langID int, source, input, expectedOutput string) *OuResult {
 	url := fmt.Sprintf("http://%s:%s/submissions?wait=true", os.Getenv("JUDGE_0_IP"), os.Getenv("JUDGE_0_PORT"))
 
 	req := map[string]string{"source_code": source, "stdin": input, "language_id": strconv.Itoa(langID), "expected_output": expectedOutput}
@@ -30,8 +37,7 @@ func OuSubmit(langID int, source, input, expectedOutput string) *Result {
 	}
 	defer res.Body.Close()
 
-	var result *Result
-	result = new(Result)
+	result := new(OuResult)
 	json.NewDecoder(res.Body).Decode(result)
 	return result
 }

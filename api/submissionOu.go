@@ -66,7 +66,7 @@ func OuCreateSubmission(c echo.Context) error {
 
 // OuGetAllSubmissions get all submissions
 func OuGetAllSubmissions(c echo.Context) error {
-	submissions, err := model.AllSubmissions()
+	submissions, err := model.OuAllSubmissions()
 	if err != nil {
 		return c.JSON(http.StatusNotFound, &RespError{
 			Msg: "Not found any problem",
@@ -109,7 +109,7 @@ func OuGetAllSubmissionsOfUser(c echo.Context) error {
 	}
 
 
-	submissions, err := model.AllSubmissionsFilteredByUserID(userID)
+	submissions, err := model.OuAllSubmissionsFilteredByUserID(userID)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, &RespError{
 			Msg: "Not found this submissions",
@@ -129,7 +129,7 @@ func OuGetSubmissionWithID(c echo.Context) error {
 		})
 	}
 
-	submission, err := model.SpecificSubmission(id)
+	submission, err := model.OuSpecificSubmission(id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, &RespError{
 			Msg: "Not found this problem",
