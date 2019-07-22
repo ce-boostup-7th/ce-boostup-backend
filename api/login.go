@@ -1,7 +1,7 @@
 package api
 
 import (
-	"../model"
+	"ce-boostup-backend/model"
 	"net/http"
 	"os"
 	"time"
@@ -12,18 +12,36 @@ import (
 	"github.com/labstack/echo"
 )
 
+//RespSuccess struct for json return
+type RespSuccess struct {
+	ID  int    `json:"id"`
+	Msg string `json:"msg"`
+}
+
+//RespError struct for json return
+type RespError struct {
+	Msg string `json:"msg"`
+	Err error  `json:"err"`
+}
+
 // Login authorize and return a cookie Ou
 func Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
+	isExist, _ := model.IsUserExist(username)
+	//Throws unanthorized error
+	if !(*isExist) {
+		return c.String(http.StatusNotFound, "cannot found that user")
+	}
+
 	userID, hashedPassword, err := model.IDPasswordByUsername(username)
 	if err != nil {
-		return c.String(http.StatusUnauthorized, "Incorrect Username or Password")
+		return c.String(http.StatusUnauthorized, "Incorrect Password")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(*hashedPassword), []byte(password))
 	if err != nil {
-		return c.String(http.StatusUnauthorized, "Incorrect Username or Password")
+		return c.String(http.StatusUnauthorized, "Incorrect Password")
 	}
 
 	// Create token
@@ -49,17 +67,4 @@ func Login(c echo.Context) error {
 	c.SetCookie(cookie)
 
 	return c.String(http.StatusOK, "logged in")
-}
-
-//Accessible accessible without authentication
-func Accessible(c echo.Context) error {
-	return c.String(http.StatusOK, "Accessible")
-}
-
-//Restricted cannot access without authentication
-func Restricted(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	name := claims["name"].(string)
-	return c.String(http.StatusOK, "Welcome "+name+"!")
 }

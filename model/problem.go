@@ -1,7 +1,7 @@
 package model
 
 import (
-	"../db"
+	"ce-boostup-backend/db"
 	"fmt"
 )
 
@@ -143,7 +143,7 @@ func SpecificTestcaseWithID(id int) ([]*Testcase, error) {
 // UpdateTestcase add a new testcase with just input and we'll get output of testcase by using Judge0 Ou
 func UpdateTestcase(id int, index int, testcase Testcase) error {
 	statement := `UPDATE public.problem SET testcase = (testcase[0:$1] || ($3,$4)::TESTCASE || testcase[$2:]) WHERE id=$5`
-	_, err := db.DB.Exec(statement, index - 1, index + 1, testcase.Input, testcase.Output, id)
+	_, err := db.DB.Exec(statement, index-1, index+1, testcase.Input, testcase.Output, id)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func UpdateTestcase(id int, index int, testcase Testcase) error {
 // DeleteTestcase add a new testcase with just input and we'll get output of testcase by using Judge0 Ou
 func DeleteTestcase(id int, index int) error {
 	statement := `UPDATE public.problem SET testcase = (testcase[0:$1]  || testcase[$2:]) WHERE id=$3`
-	_, err := db.DB.Exec(statement, index - 1, index + 1, id)
+	_, err := db.DB.Exec(statement, index-1, index+1, id)
 	if err != nil {
 		return err
 	}
