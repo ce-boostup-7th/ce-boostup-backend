@@ -24,7 +24,10 @@ type OverallSubmission struct {
 
 //History recent submission
 type History struct {
-	ProblemID int `json:"problem_id"`
+	ProblemID	int `json:"problem_id"`
+	Title		string `json:"title"`
+	Percen		float32 `json:"percen"`
+	LastDo		string `json:"last_do"`
 }
 
 //Pulse Active pulse of user submission
@@ -139,7 +142,29 @@ order by allProblem.categoryid`
 
 	statistic.ProgressArray = progressArr
 
-	statement = `SELECT problem_id FROM submission WHERE usr_id=$1 ORDER BY submission_id DESC limit 4;`
+	statement = 
+`select submission.problem_id, problem.title, submission.percen, submission.last_do
+from (
+	select public.submission.problem_id,
+		max(public.submission.submittedat) as last_do,
+		max(public.submission.score * 100.0 / public.submission.max_score) as percen
+	from public.submission
+	where public.submission.usr_id = $1
+		and public.submission.problem_id not in (
+			select public.submission.problem_id 
+			from public.submission
+			where public.submission.score = public.submission.max_score
+			group by public.submission.problem_id
+		)
+	group by public.submission.problem_id
+) as submission
+inner join (
+	select public.problem.id, public.problem.title
+	from public.problem
+) as problem
+on submission.problem_id = problem.id
+order by submission.last_do desc
+limit 4`
 	rows, err = db.DB.Query(statement, id)
 	if err != nil {
 		return nil, err
@@ -150,7 +175,7 @@ order by allProblem.categoryid`
 	for rows.Next() {
 		history := new(History)
 
-		err := rows.Scan(&history.ProblemID)
+		err := rows.Scan(&history.ProblemID, &history.Title, &history.Percen, &history.LastDo)
 		if err != nil {
 			return nil, err
 		}
