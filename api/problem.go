@@ -20,6 +20,12 @@ type RespError struct {
   Err error `json:"err"`
 }
 
+// RespSingleProblem struct for json return
+type RespSingleProblem struct {
+  	Problem model.Problem `json:"problem"`
+	Testcase []*model.Testcase `json:"testcase"`
+}
+
 // CreateProblem create a new problem Ou
 func CreateProblem(c echo.Context) error {
 	problem := new(model.Problem)
@@ -70,7 +76,28 @@ func GetProblemWithID(c echo.Context) error {
 			Err: err,
 		})
 	}
-	return c.JSON(http.StatusOK, problem)
+
+	testcase, err := model.SpecificTestcaseWithID(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Not found any testcase",
+			Err: err,
+		})
+	}
+
+	lent := len(testcase)
+	if lent > 3 {
+		lent = 3
+	}
+
+	testcase = testcase[0:lent]
+	
+	respSingleProblem := new(RespSingleProblem)
+
+	respSingleProblem.Problem = *problem
+	respSingleProblem.Testcase = testcase
+
+	return c.JSON(http.StatusOK, respSingleProblem)
 }
 
 // UpdateProblem update problem data Ou
