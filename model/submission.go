@@ -28,13 +28,13 @@ func NewSubmission(userID int, problemID int, languageID int, src string) error 
 	runtime := 0.0
 	memory := 0
 
-	testcase, err := SpecificTestcaseWithID(problemID)
+	testcase, err := OuSpecificTestcaseWithID(problemID)
 	if err != nil {
 		return err
 	}
 
 	for i := range testcase {
-		result := judge0.OuSubmit(languageID, src, testcase[i].Input, testcase[i].Output)
+		result := judge0.Submit(languageID, src, testcase[i].Input, testcase[i].Output)
 		memory += result.Memory
 		runtime += conversion.StringToFloat(result.Time)
 		if result.Status.ID == 3 {
