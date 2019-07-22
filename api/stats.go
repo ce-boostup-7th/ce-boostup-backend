@@ -1,8 +1,8 @@
 package api
 
 import (
-	"ce-boostup-backend/conversion"
-	"ce-boostup-backend/model"
+	"../conversion"
+	"../model"
 	"fmt"
 	"net/http"
 	"os"
@@ -29,7 +29,7 @@ func GetUserStats(c echo.Context) error {
 	}
 
 	userIDStr := fmt.Sprintf("%v", claims["userID"])
-	id := conversion.StringToInt(userIDStr)
+	id, _ := conversion.StringToInt(userIDStr)
 	stat, err := model.SpecificUserStatWithID(id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)

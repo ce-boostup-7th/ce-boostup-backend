@@ -1,9 +1,8 @@
 package model
 
 import (
-	"ce-boostup-backend/db"
+	"../db"
 	"fmt"
-	"strings"
 )
 
 //Testcase input and output of testcases
@@ -72,41 +71,6 @@ func SpecificProblemWithID(id int) (*Problem, error) {
 	return problem, nil
 }
 
-//SpecificTestcaseWithID return turncase from specific problem
-func SpecificTestcaseWithID(id int) ([]*Testcase, error) {
-	statement := `SELECT UNNEST(testcase) FROM problem WHERE id=$1`
-	rows, err := db.DB.Query(statement, id)
-	if err != nil {
-		return nil, err
-	}
-
-	testcases := make([]*Testcase, 0)
-	for rows.Next() {
-		testcase := new(Testcase)
-		var s, input, output string
-		err := rows.Scan(&s)
-		seperateString(s, &input, &output)
-		if err != nil {
-			return nil, err
-		}
-		testcase.Input = input
-		testcase.Output = output
-		testcases = append(testcases, testcase)
-	}
-
-	return testcases, nil
-}
-
-// NewTestcase add a new testcase with just input and we'll get output of testcase by using Judge0
-func NewTestcase(id int, testcase Testcase) error {
-	statement := `UPDATE problem SET testcase=array_append(testcase,($1,$2)::TESTCASE) WHERE id=$3`
-	_, err := db.DB.Exec(statement, testcase.Input+" ", testcase.Output+" ", id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 //UpdateProblem update problem datat
 func UpdateProblem(problem Problem) error {
 	statement := `UPDATE problem SET title=$1,description=$2,categoryID=$3,difficulty=$4,updatedat=CURRENT_TIMESTAMP WHERE id=$5`
@@ -137,17 +101,61 @@ func DeleteProblemWithSpecificID(id int) error {
 	return nil
 }
 
-func seperateString(str string, str1 *string, str2 *string) {
-	str = strings.Replace(str, "(", "", 1)
-	str = strings.Replace(str, ")", "", 1)
-	s := strings.Split(str, ",")
-	*str1, *str2 = s[0], s[1]
-}
-
 func countAllProblems() int {
 	var count int
 	statement := "SELECT COUNT(*) FROM problem;"
 	row := db.DB.QueryRow(statement)
 	row.Scan(&count)
 	return count
+}
+
+// NewTestcase add a new testcase with just input and we'll get output of testcase by using Judge0 Ou
+func NewTestcase(id int, testcase Testcase) error {
+	statement := `UPDATE public.problem SET testcase = array_append(testcase, ($1,$2)::TESTCASE) WHERE id=$3`
+	_, err := db.DB.Exec(statement, testcase.Input, testcase.Output, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SpecificTestcaseWithID return turncase from specific problem
+func SpecificTestcaseWithID(id int) ([]*Testcase, error) {
+	statement := `select (m.u).input, (m.u).output from (SELECT UNNEST(testcase) as u FROM public.problem WHERE id=$1) as m`
+	rows, err := db.DB.Query(statement, id)
+	if err != nil {
+		return nil, err
+	}
+
+	testcases := make([]*Testcase, 0)
+	for rows.Next() {
+		testcase := new(Testcase)
+		err := rows.Scan(&testcase.Input, &testcase.Output)
+		if err != nil {
+			return nil, err
+		}
+		testcases = append(testcases, testcase)
+	}
+
+	return testcases, nil
+}
+
+// UpdateTestcase add a new testcase with just input and we'll get output of testcase by using Judge0 Ou
+func UpdateTestcase(id int, index int, testcase Testcase) error {
+	statement := `UPDATE public.problem SET testcase = (testcase[0:$1] || ($3,$4)::TESTCASE || testcase[$2:]) WHERE id=$5`
+	_, err := db.DB.Exec(statement, index - 1, index + 1, testcase.Input, testcase.Output, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteTestcase add a new testcase with just input and we'll get output of testcase by using Judge0 Ou
+func DeleteTestcase(id int, index int) error {
+	statement := `UPDATE public.problem SET testcase = (testcase[0:$1]  || testcase[$2:]) WHERE id=$3`
+	_, err := db.DB.Exec(statement, index - 1, index + 1, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

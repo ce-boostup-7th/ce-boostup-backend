@@ -1,7 +1,7 @@
 package route
 
 import (
-	"ce-boostup-backend/api"
+	"../api"
 	"net/http"
 
 	"github.com/labstack/echo/middleware"
@@ -15,7 +15,7 @@ func Init() *echo.Echo {
 
 	// config CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:1234", "http://problem-injector.surge.sh"},
+		AllowOrigins:     []string{"http://localhost:1234", "http://problem-injector.surge.sh", "https://ceboostup.netlify.com"},
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 		AllowCredentials: true,
 	}))
@@ -40,20 +40,21 @@ func Init() *echo.Echo {
 	e.DELETE("/users/:id", api.DeleteUserWithSpecificID)
 
 	//problem routes
+	e.POST("/problems", api.CreateProblem)
 	e.GET("/problems", api.GetAllProblems)
 	e.GET("/problems/:id", api.GetProblemWithID)
-	e.POST("/problems", api.CreateProblem)
 	e.PUT("/problems/:id", api.UpdateProblem)
-	e.DELETE("/problems", api.DeleteAllProblems)
-	e.DELETE("problems/:id", api.DeleteProblemWithSpecificID)
-	e.GET("/problems/testcases/:id", api.GetTestcaseWithID)
-	e.POST("/problems/testcases/:id", api.CreateTestcase)
+	e.DELETE("/problems/:id", api.DeleteProblemWithSpecificID)
+
+	e.GET("/problems/:id/testcases", api.GetTestcaseWithID)
+	e.POST("/problems/:id/testcases", api.CreateTestcase)
+	e.PUT("/problems/:id/testcases/:index", api.UpdateTestcase)
+	e.DELETE("/problems/:id/testcases/:index", api.DeleteTestcase)
 
 	//submission routes
+	e.POST("/submissions", api.CreateSubmission)
 	e.GET("/submissions", api.GetAllSubmissions)
 	e.GET("/submissions/:id", api.GetSubmissionWithID)
-	e.POST("/submissions", api.CreateSubmission)
-	e.DELETE("/submissions", api.DeleteAllSubmissions)
 
 	e.GET("/users/submissions", api.GetAllSubmissionsOfUser)
 

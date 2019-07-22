@@ -1,92 +1,110 @@
 package api
 
 import (
-	"ce-boostup-backend/conversion"
-	"ce-boostup-backend/model"
+	"../conversion"
+	"../model"
 	"net/http"
 
 	"github.com/labstack/echo"
 )
 
-//CreateProblem create a new problem
-func CreateProblem(c echo.Context) error {
-	var problem model.Problem
-	if err := c.Bind(&problem); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
-	id, err := model.NewProblem(problem.Title, problem.CategoryID, problem.Difficulty, problem.Description)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
-	return c.JSON(http.StatusCreated, id)
+//RespSuccess struct for json return
+type RespSuccess struct {
+  	ID int `json:"id"`
+	Msg string `json:"msg"`
 }
 
-//GetAllProblems get all problems
+//RespError struct for json return
+type RespError struct {
+  Msg string `json:"msg"`
+  Err error `json:"err"`
+}
+
+// CreateProblem create a new problem Ou
+func CreateProblem(c echo.Context) error {
+	problem := new(model.Problem)
+	if err := c.Bind(problem); err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "Request data not in correct format",
+			Err: err,
+		})
+	}
+
+	id, err := model.NewProblem(problem.Title, problem.CategoryID, problem.Difficulty, problem.Description)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &RespError{
+			Msg: "Can not create problem",
+			Err: err,
+		})
+	}
+
+	return c.JSON(http.StatusCreated, &RespSuccess{ID: *id, Msg: "Created"})
+}
+
+// GetAllProblems get all problems Ou
 func GetAllProblems(c echo.Context) error {
 	problems, err := model.AllProblems()
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err)
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Not found any problem",
+			Err: err,
+		})
 	}
 	return c.JSON(http.StatusOK, problems)
 }
 
-//GetProblemWithID get specific problem by id
+// GetProblemWithID get specific problem by id Ou
 func GetProblemWithID(c echo.Context) error {
-	str := c.Param("id")
-
-	id := conversion.StringToInt(str)
+	id, err := conversion.StringToInt(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
+	}
 
 	problem, err := model.SpecificProblemWithID(id)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err)
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Not found that problem ID",
+			Err: err,
+		})
 	}
 	return c.JSON(http.StatusOK, problem)
 }
 
-// GetTestcaseWithID get testcase from judge0
-func GetTestcaseWithID(c echo.Context) error {
-	str := c.Param("id")
-
-	id := conversion.StringToInt(str)
-
-	testcase, err := model.SpecificTestcaseWithID(id)
-	if err != nil {
-		return c.String(http.StatusNotFound, "not found any testcases")
-	}
-	return c.JSON(http.StatusOK, testcase)
-}
-
-//CreateTestcase create a new testcase
-func CreateTestcase(c echo.Context) error {
-	str := c.Param("id")
-
-	id := conversion.StringToInt(str)
-
-	var testcase model.Testcase
-	if err := c.Bind(&testcase); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
-	model.NewTestcase(id, testcase)
-	return c.JSON(http.StatusCreated, "created")
-}
-
-//UpdateProblem update problem data
+// UpdateProblem update problem data Ou
 func UpdateProblem(c echo.Context) error {
-
-	str := c.Param("id")
-	id := conversion.StringToInt(str)
-
-	problemPtr, _ := model.SpecificProblemWithID(id)
-	problem := *problemPtr
-	if err := c.Bind(&problem); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
-
-	err := model.UpdateProblem(problem)
+	id, err := conversion.StringToInt(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err)
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
 	}
-	return c.String(http.StatusOK, "updated")
+
+	problem, err := model.SpecificProblemWithID(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Can not found that problem ID",
+			Err: err,
+		})
+	}
+	if err = c.Bind(problem); err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "Request data not in correct format",
+			Err: err,
+		})
+	}
+
+	err = model.UpdateProblem(*problem)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &RespError{
+			Msg: "Can not update that problem ID",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusOK, &RespSuccess{ID: id, Msg: "Updated"})
 }
 
 //DeleteAllProblems delete every problems
@@ -98,15 +116,139 @@ func DeleteAllProblems(c echo.Context) error {
 	return c.String(http.StatusOK, "deleted")
 }
 
-//DeleteProblemWithSpecificID delete a problem by id
+// DeleteProblemWithSpecificID delete a problem by id Ou
 func DeleteProblemWithSpecificID(c echo.Context) error {
-	str := c.Param("id")
-
-	id := conversion.StringToInt(str)
-
-	err := model.DeleteProblemWithSpecificID(id)
+	id, err := conversion.StringToInt(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err)
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
 	}
-	return c.String(http.StatusOK, "deleted")
+
+	err = model.DeleteProblemWithSpecificID(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &RespError{
+			Msg: "Can not delete that problem ID",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusOK,  &RespSuccess{ID: id, Msg: "Delete"})
+}
+
+// CreateTestcase create a new testcase Ou
+func CreateTestcase(c echo.Context) error {
+	id, err := conversion.StringToInt(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
+	}
+
+	testcase := new(model.Testcase)
+
+	if err := c.Bind(testcase); err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg:  "Request data not in correct format",
+			Err: err,
+		})
+	}
+	err = model.NewTestcase(id, *testcase)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &RespError{
+			Msg:  "Can not create new testcase",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusCreated,  &RespSuccess{Msg: "Created"})
+}
+
+// GetTestcaseWithID get testcase from judge0 Ou
+func GetTestcaseWithID(c echo.Context) error {
+	id, err := conversion.StringToInt(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
+	}
+
+	testcase, err := model.SpecificTestcaseWithID(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Not found any testcase",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusOK, testcase)
+}
+
+
+// UpdateTestcase create a new testcase Ou
+func UpdateTestcase(c echo.Context) error {
+	id, err := conversion.StringToInt(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
+	}
+
+	index, err := conversion.StringToInt(c.Param("index"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
+	}
+
+	index++;
+
+	testcase := new(model.Testcase)
+
+	if err := c.Bind(testcase); err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg:  "Request data not in correct format",
+			Err: err,
+		})
+	}
+	err = model.UpdateTestcase(id, index, *testcase)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &RespError{
+			Msg:  "Can not create new testcase",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusCreated,  &RespSuccess{Msg: "Update"})
+}
+
+// DeleteTestcase create a new testcase Ou
+func DeleteTestcase(c echo.Context) error {
+	id, err := conversion.StringToInt(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
+	}
+
+	index, err := conversion.StringToInt(c.Param("index"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
+	}
+
+	index++;
+
+	err = model.DeleteTestcase(id, index)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &RespError{
+			Msg: "Can not delete that problem ID",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusCreated,  &RespSuccess{Msg: "Deleted"})
 }
