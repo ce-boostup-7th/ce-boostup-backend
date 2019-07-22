@@ -50,16 +50,3 @@ func Login(c echo.Context) error {
 
 	return c.String(http.StatusOK, "logged in")
 }
-
-//Accessible accessible without authentication
-func Accessible(c echo.Context) error {
-	return c.String(http.StatusOK, "Accessible")
-}
-
-//Restricted cannot access without authentication
-func Restricted(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	name := claims["name"].(string)
-	return c.String(http.StatusOK, "Welcome "+name+"!")
-}

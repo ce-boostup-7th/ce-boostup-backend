@@ -61,10 +61,5 @@ func Init() *echo.Echo {
 	//special
 	e.GET("/users/stats", api.GetUserStats)
 
-	// Restricted group
-	r := e.Group("/restricted")
-	r.Use(middleware.JWT([]byte("secret")))
-	r.GET("", api.Restricted)
-
 	return e
 }
