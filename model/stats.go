@@ -2,6 +2,7 @@ package model
 
 import (
 	"ce-boostup-backend/db"
+	"fmt"
 )
 
 //Statistic a stat of grader user
@@ -17,8 +18,8 @@ type Statistic struct {
 
 // OverallSubmission get the overall submission data of user
 type OverallSubmission struct {
-	Name   string `json:"name"`
-	Amount int    `json:"amount"`
+	Name   string  `json:"name"`
+	Amount float64 `json:"value"`
 }
 
 //History recent submission
@@ -71,10 +72,11 @@ func SpecificUserStatWithID(id int) (*Statistic, error) {
 	if &overall.Amount == nil {
 		overall.Amount = 0
 	}
-	overall.Name = "completed"
+	completed := overall.Amount
+	overall.Amount = (overall.Amount / float64(countAllProblems())) * 100.0
+	overall.Name = "success"
 	overallSubmissions = append(overallSubmissions, overall)
 
-	completed := overall.Amount
 	var temp int
 	overall = new(OverallSubmission)
 	statement = `SELECT COUNT(distinct problem_id) FROM submission WHERE usr_id=$1 HAVING COUNT(submission_id) > 0;`
@@ -83,8 +85,9 @@ func SpecificUserStatWithID(id int) (*Statistic, error) {
 	if &temp == nil {
 		temp = 0
 	}
-	overall.Amount = temp - completed
-	overall.Name = "working"
+	fmt.Println(temp, completed)
+	overall.Amount = (float64(temp) - completed) / float64(countAllProblems()) * 100.0
+	overall.Name = "in progress"
 	overallSubmissions = append(overallSubmissions, overall)
 
 	overall = new(OverallSubmission)
@@ -94,7 +97,7 @@ func SpecificUserStatWithID(id int) (*Statistic, error) {
 	if &temp == nil {
 		temp = 0
 	}
-	overall.Amount = countAllProblems() - temp
+	overall.Amount = (float64(countAllProblems()) - float64(temp)) / float64(countAllProblems()) * 100.0
 	overall.Name = "not started"
 	overallSubmissions = append(overallSubmissions, overall)
 
