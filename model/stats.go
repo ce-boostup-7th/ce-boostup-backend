@@ -13,7 +13,7 @@ type Statistic struct {
 	Overall       []*OverallSubmission `json:"overall"`
 	UserHistory   []*History           `json:"history"`
 	ActivePulse   []*Pulse             `json:"active_pulse"`
-	Histogram     Histogram            `json:"histogram"`
+	Histogram     []*Histogram            `json:"histogram"`
 }
 
 // OverallSubmission get the overall submission data of user
@@ -45,14 +45,9 @@ type Progress struct {
 
 //Histogram data for create a histogram
 type Histogram struct {
-	AllPlot   []*Plot `json:"plot"`
-	UserScore int     `json:"user_score"`
-}
-
-//Plot plot a histogram
-type Plot struct {
-	ProgressRange string `json:"progress_range"`
-	Amount        int    `json:"amount"`
+	Start	float32	`json:"start"`
+	Stop	float32 `json:"stop"`
+	Amount	int 	`json:"amount"`
 }
 
 //SpecificUserStatWithID get user stat by id
@@ -206,27 +201,55 @@ limit 4`
 
 	statistic.ActivePulse = pulses
 
-	statement = `SELECT range,freq FROM histogram('grader_user','score')`
+	statement =
+`select public.grader_user.score
+from public.grader_user
+order by public.grader_user.score`
 	rows, err = db.DB.Query(statement)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	plots := make([]*Plot, 0)
+	scores := make([]int, 0)
 	for rows.Next() {
-		plot := new(Plot)
+		score := 0
 
-		err := rows.Scan(&plot.ProgressRange, &plot.Amount)
+		err := rows.Scan(&score)
 		if err != nil {
 			return nil, err
 		}
 
-		plots = append(plots, plot)
+		scores = append(scores, score)
 	}
 
-	statistic.Histogram.UserScore = statistic.Score
-	statistic.Histogram.AllPlot = plots
+	min := scores[0]
+	max := scores[len(scores) - 1]
+
+	histograms := [5]int{0, 0, 0, 0, 0}
+	for _, v := range scores {
+		histograms[int(float32(v - min) / float32(max - min) * 4)]++
+	}
+
+	histograms[3] += histograms[4]
+	histogramsSplit := histograms[0:4]
+
+	histogramsOut := make([]*Histogram, 0)
+
+	for k, v := range histogramsSplit {
+		histogramOut := new(Histogram)
+
+		histogramOut.Amount = v
+		histogramOut.Start = float32(max-min) / 4.0 * float32(k)
+		histogramOut.Stop = float32(max-min) / 4.0 * float32(k + 1)
+		if k != 3 {
+			histogramOut.Stop--
+		}
+
+		histogramsOut = append(histogramsOut, histogramOut)
+	}
+
+	statistic.Histogram = histogramsOut
 
 	return statistic, nil
 }
