@@ -1,28 +1,29 @@
 package api
 
 import (
-	"../conversion"
-	"../model"
+	"ce-boostup-backend/model"
 	"net/http"
+
+	"ce-boostup-backend/conversion"
 
 	"github.com/labstack/echo"
 )
 
 //RespSuccess struct for json return
 type RespSuccess struct {
-  	ID int `json:"id"`
+	ID  int    `json:"id"`
 	Msg string `json:"msg"`
 }
 
 //RespError struct for json return
 type RespError struct {
-  Msg string `json:"msg"`
-  Err error `json:"err"`
+	Msg string `json:"msg"`
+	Err error  `json:"err"`
 }
 
 // RespSingleProblem struct for json return
 type RespSingleProblem struct {
-  	Problem model.Problem `json:"problem"`
+	Problem  model.Problem     `json:"problem"`
 	Testcase []*model.Testcase `json:"testcase"`
 }
 
@@ -91,7 +92,7 @@ func GetProblemWithID(c echo.Context) error {
 	}
 
 	testcase = testcase[0:lent]
-	
+
 	respSingleProblem := new(RespSingleProblem)
 
 	respSingleProblem.Problem = *problem
@@ -160,7 +161,7 @@ func DeleteProblemWithSpecificID(c echo.Context) error {
 			Err: err,
 		})
 	}
-	return c.JSON(http.StatusOK,  &RespSuccess{ID: id, Msg: "Delete"})
+	return c.JSON(http.StatusOK, &RespSuccess{ID: id, Msg: "Delete"})
 }
 
 // CreateTestcase create a new testcase Ou
@@ -177,18 +178,18 @@ func CreateTestcase(c echo.Context) error {
 
 	if err := c.Bind(testcase); err != nil {
 		return c.JSON(http.StatusBadRequest, &RespError{
-			Msg:  "Request data not in correct format",
+			Msg: "Request data not in correct format",
 			Err: err,
 		})
 	}
 	err = model.NewTestcase(id, *testcase)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &RespError{
-			Msg:  "Can not create new testcase",
+			Msg: "Can not create new testcase",
 			Err: err,
 		})
 	}
-	return c.JSON(http.StatusCreated,  &RespSuccess{Msg: "Created"})
+	return c.JSON(http.StatusCreated, &RespSuccess{Msg: "Created"})
 }
 
 // GetTestcaseWithID get testcase from judge0 Ou
@@ -211,7 +212,6 @@ func GetTestcaseWithID(c echo.Context) error {
 	return c.JSON(http.StatusOK, testcase)
 }
 
-
 // UpdateTestcase create a new testcase Ou
 func UpdateTestcase(c echo.Context) error {
 	id, err := conversion.StringToInt(c.Param("id"))
@@ -230,24 +230,24 @@ func UpdateTestcase(c echo.Context) error {
 		})
 	}
 
-	index++;
+	index++
 
 	testcase := new(model.Testcase)
 
 	if err := c.Bind(testcase); err != nil {
 		return c.JSON(http.StatusBadRequest, &RespError{
-			Msg:  "Request data not in correct format",
+			Msg: "Request data not in correct format",
 			Err: err,
 		})
 	}
 	err = model.UpdateTestcase(id, index, *testcase)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &RespError{
-			Msg:  "Can not create new testcase",
+			Msg: "Can not create new testcase",
 			Err: err,
 		})
 	}
-	return c.JSON(http.StatusCreated,  &RespSuccess{Msg: "Update"})
+	return c.JSON(http.StatusCreated, &RespSuccess{Msg: "Update"})
 }
 
 // DeleteTestcase create a new testcase Ou
@@ -268,7 +268,7 @@ func DeleteTestcase(c echo.Context) error {
 		})
 	}
 
-	index++;
+	index++
 
 	err = model.DeleteTestcase(id, index)
 	if err != nil {
@@ -277,5 +277,5 @@ func DeleteTestcase(c echo.Context) error {
 			Err: err,
 		})
 	}
-	return c.JSON(http.StatusCreated,  &RespSuccess{Msg: "Deleted"})
+	return c.JSON(http.StatusCreated, &RespSuccess{Msg: "Deleted"})
 }

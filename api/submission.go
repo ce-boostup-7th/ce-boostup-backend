@@ -1,8 +1,8 @@
 package api
 
 import (
-	"../conversion"
-	"../model"
+	"ce-boostup-backend/conversion"
+	"ce-boostup-backend/model"
 	"fmt"
 	"net/http"
 	"os"
@@ -105,7 +105,6 @@ func GetAllSubmissionsOfUser(c echo.Context) error {
 			Err: err,
 		})
 	}
-
 
 	submissions, err := model.AllSubmissionsFilteredByUserID(userID)
 	if err != nil {

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"../model"
+	"ce-boostup-backend/model"
 	"net/http"
 	"os"
 	"time"
@@ -22,13 +22,14 @@ func Login(c echo.Context) error {
 	if !(*isExist) {
 		return c.JSON(http.StatusNotFound, "cannot found that user")
 	}
+
 	userID, hashedPassword, err := model.IDPasswordByUsername(username)
 	if err != nil {
-		return c.String(http.StatusUnauthorized, "Incorrect Username or Password")
+		return c.String(http.StatusUnauthorized, "Incorrect Password")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(*hashedPassword), []byte(password))
 	if err != nil {
-		return c.String(http.StatusUnauthorized, "Incorrect Username or Password")
+		return c.String(http.StatusUnauthorized, "Incorrect Password")
 	}
 
 	// Create token

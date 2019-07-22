@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./db"
-	"./route"
+	"ce-boostup-backend/db"
+	"ce-boostup-backend/route"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -13,7 +13,7 @@ func main() {
 	if err := godotenv.Load("./variables.env"); err != nil {
 		log.Fatal("No .env file found")
 	}
-	e := route.Init()
 	db.Init()
+	e := route.Init()
 	e.Logger.Fatal(e.Start(":1323"))
 }

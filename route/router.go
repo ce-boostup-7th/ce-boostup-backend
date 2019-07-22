@@ -1,7 +1,7 @@
 package route
 
 import (
-	"../api"
+	"ce-boostup-backend/api"
 	"net/http"
 
 	"github.com/labstack/echo/middleware"

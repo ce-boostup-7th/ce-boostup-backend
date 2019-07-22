@@ -1,26 +1,26 @@
 package model
 
 import (
-	"../conversion"
-	"../db"
-	"../judge0"
+	"ce-boostup-backend/conversion"
+	"ce-boostup-backend/db"
+	"ce-boostup-backend/judge0"
 	"database/sql"
 )
 
 // Submission a model for submission Ou
 type Submission struct {
-	SubmissionID 	int     `json:"submission_id" form:"submission_id"`
-	UserID       	int     `json:"user_id" form:"user_id"`
-	ProblemID    	int     `json:"problem_id" form:"problem_id"`
-	LanguageID   	int     `json:"language_id" form:"language_id"`
-	Src          	string  `json:"src" form:"src"`
-	SubmittedAt  	string  `json:"submitted_at" form:"submitted_at"`
-	Score        	int     `json:"score" form:"score"`
-	MaxScore     	int     `json:"max_score" form:"max_score"`
-	Runtime      	float64 `json:"runtime" form:"runtime"`
-	MemoryUsage  	int     `json:"memory_usage" form:"memory_usage"`
-	Results			string 	`json:"results" form:"results"`
-	CompileOutput 	string	`json:"compile_output" form:"compile_output"`
+	SubmissionID  int     `json:"submission_id" form:"submission_id"`
+	UserID        int     `json:"user_id" form:"user_id"`
+	ProblemID     int     `json:"problem_id" form:"problem_id"`
+	LanguageID    int     `json:"language_id" form:"language_id"`
+	Src           string  `json:"src" form:"src"`
+	SubmittedAt   string  `json:"submitted_at" form:"submitted_at"`
+	Score         int     `json:"score" form:"score"`
+	MaxScore      int     `json:"max_score" form:"max_score"`
+	Runtime       float64 `json:"runtime" form:"runtime"`
+	MemoryUsage   int     `json:"memory_usage" form:"memory_usage"`
+	Results       string  `json:"results" form:"results"`
+	CompileOutput string  `json:"compile_output" form:"compile_output"`
 }
 
 // NewSubmission create a new submission ou
@@ -42,7 +42,7 @@ func NewSubmission(userID int, problemID int, languageID int, src string) (*Subm
 	// submission.MemoryUsage = 0
 	// submission.Results = ""
 	// submission.CompileOutput = ""
-	
+
 	resultsArr := make([]byte, len(testcases))
 
 	ch := make(chan *judge0.Result)
@@ -56,8 +56,8 @@ func NewSubmission(userID int, problemID int, languageID int, src string) (*Subm
 	}
 
 	for range testcases {
-		result := <- ch
-		index := <- chIndex
+		result := <-ch
+		index := <-chIndex
 
 		submission.MemoryUsage += result.Memory
 		submission.Runtime += conversion.StringToFloat(result.Time)
@@ -118,7 +118,7 @@ var baseSQL = `SELECT submission_id, src, usr_id, problem_id, lang_id, submitted
 
 // AllSubmissions get all submissions Ou
 func AllSubmissions() ([]*Submission, error) {
-	rows, err := db.DB.Query( baseSQL + " ORDER BY submission_id")
+	rows, err := db.DB.Query(baseSQL + " ORDER BY submission_id")
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func AllSubmissions() ([]*Submission, error) {
 
 // AllSubmissionsFilteredByUserID filter all user that filtered by userID Ou
 func AllSubmissionsFilteredByUserID(uid int) ([]*Submission, error) {
-	rows, err := db.DB.Query(baseSQL + " WHERE usr_id=$1 ORDER BY submission_id", uid)
+	rows, err := db.DB.Query(baseSQL+" WHERE usr_id=$1 ORDER BY submission_id", uid)
 	if err != nil {
 		return nil, err
 	}
@@ -148,13 +148,13 @@ func AllSubmissionsFilteredByUserID(uid int) ([]*Submission, error) {
 
 // SpecificSubmission return a specific submission by id Ou
 func SpecificSubmission(id int) (*Submission, error) {
-	row := db.DB.QueryRow(baseSQL + " WHERE submission_id=$1", id)
+	row := db.DB.QueryRow(baseSQL+" WHERE submission_id=$1", id)
 
 	submission, err := scanSubmissionRow(row)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return submission, nil
 }
 
@@ -182,16 +182,16 @@ func scanSubmissionRow(row *sql.Row) (*Submission, error) {
 
 	var results sql.NullString
 	var compileOutput sql.NullString
-	
-	err := row.Scan(&submission.SubmissionID, 
-		&submission.Src, 
-		&submission.UserID, 
-		&submission.ProblemID, 
-		&submission.LanguageID, 
-		&submission.SubmittedAt, 
-		&submission.Score, 
-		&submission.MaxScore, 
-		&submission.Runtime, 
+
+	err := row.Scan(&submission.SubmissionID,
+		&submission.Src,
+		&submission.UserID,
+		&submission.ProblemID,
+		&submission.LanguageID,
+		&submission.SubmittedAt,
+		&submission.Score,
+		&submission.MaxScore,
+		&submission.Runtime,
 		&submission.MemoryUsage,
 		&results,
 		&compileOutput,
@@ -221,7 +221,7 @@ func scansSubmissionRow(rows *sql.Rows) ([]*Submission, error) {
 		var results sql.NullString
 		var compileOutput sql.NullString
 
-		err := rows.Scan(&submission.SubmissionID, 
+		err := rows.Scan(&submission.SubmissionID,
 			&submission.Src,
 			&submission.UserID,
 			&submission.ProblemID,
