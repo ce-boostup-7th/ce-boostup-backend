@@ -94,28 +94,16 @@ func DeleteUserWithSpecificID(id int) error {
 	return nil
 }
 
-//PasswordByUsername get password by username
-func PasswordByUsername(username string) (*string, error) {
-	statement := `SELECT password FROM grader_user WHERE username=$1`
-	row := db.DB.QueryRow(statement, username)
-
-	var password string
-	err := row.Scan(&password)
-	if err != nil {
-		return nil, err
-	}
-	return &password, nil
-}
-
-//IDByUsername get user id by username
-func IDByUsername(username string) (*int, error) {
-	statement := `SELECT id FROM grader_user WHERE username=$1`
+//IDPasswordByUsername get password by username
+func IDPasswordByUsername(username string) (*int, *string, error) {
+	statement := `SELECT id, password FROM public.grader_user WHERE username=$1`
 	row := db.DB.QueryRow(statement, username)
 
 	var id int
-	err := row.Scan(&id)
+	var password string
+	err := row.Scan(&id, &password)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return &id, nil
+	return &id, &password, nil
 }

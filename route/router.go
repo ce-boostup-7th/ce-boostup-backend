@@ -40,50 +40,26 @@ func Init() *echo.Echo {
 	e.DELETE("/users/:id", api.DeleteUserWithSpecificID)
 
 	//problem routes
+	e.POST("/problems", api.CreateProblem)
 	e.GET("/problems", api.GetAllProblems)
 	e.GET("/problems/:id", api.GetProblemWithID)
-	e.POST("/problems", api.CreateProblem)
 	e.PUT("/problems/:id", api.UpdateProblem)
-	e.DELETE("/problems", api.DeleteAllProblems)
-	e.DELETE("problems/:id", api.DeleteProblemWithSpecificID)
-	e.GET("/problems/testcases/:id", api.GetTestcaseWithID)
-	e.POST("/problems/testcases/:id", api.CreateTestcase)
+	e.DELETE("/problems/:id", api.DeleteProblemWithSpecificID)
+
+	e.GET("/problems/:id/testcases", api.GetTestcaseWithID)
+	e.POST("/problems/:id/testcases", api.CreateTestcase)
+	e.PUT("/problems/:id/testcases/:index", api.UpdateTestcase)
+	e.DELETE("/problems/:id/testcases/:index", api.DeleteTestcase)
 
 	//submission routes
+	e.POST("/submissions", api.CreateSubmission)
 	e.GET("/submissions", api.GetAllSubmissions)
 	e.GET("/submissions/:id", api.GetSubmissionWithID)
-	e.POST("/submissions", api.CreateSubmission)
-	e.DELETE("/submissions", api.DeleteAllSubmissions)
 
 	e.GET("/users/submissions", api.GetAllSubmissionsOfUser)
 
 	//special
 	e.GET("/users/stats", api.GetUserStats)
-
-	// ---------- OU version ----------
-
-	// login&logout route
-	e.POST("/ou/login", api.OuLogin)
-	e.POST("/ou/logout", api.OuLogout)
-
-	//problem routes
-	e.POST("/ou/problems", api.OuCreateProblem)
-	e.GET("/ou/problems", api.OuGetAllProblems)
-	e.GET("/ou/problems/:id", api.OuGetProblemWithID)
-	e.PUT("/ou/problems/:id", api.OuUpdateProblem)
-	e.DELETE("/ou/problems/:id", api.OuDeleteProblemWithSpecificID)
-
-	e.GET("/ou/problems/:id/testcases", api.OuGetTestcaseWithID)
-	e.POST("/ou/problems/:id/testcases", api.OuCreateTestcase)
-	e.PUT("/ou/problems/:id/testcases/:index", api.OuUpdateTestcase)
-	e.DELETE("/ou/problems/:id/testcases/:index", api.OuDeleteTestcase)
-
-	//submission routes
-	e.POST("/ou/submissions", api.OuCreateSubmission)
-	e.GET("/ou/submissions", api.OuGetAllSubmissions)
-	e.GET("/ou/submissions/:id", api.OuGetSubmissionWithID)
-
-	e.GET("/ou/users/submissions", api.OuGetAllSubmissionsOfUser)
 
 	// Restricted group
 	r := e.Group("/restricted")
