@@ -17,10 +17,11 @@ type request struct {
 	expectedOutput string
 }
 
-// Result from Judge0 api
+// Result from Judge0 api Ou
 type Result struct {
-	Time   string `json:"time"`
-	Memory int    `json:"memory"`
+	Time			string 	`json:"time"`
+	Memory			int    	`json:"memory"`
+	CompileOutput	string	`json:"compile_output"`
 	Status struct {
 		ID int `json:"id"` // 3 for correct 4 for incorrect
 	} `json:"status"`
@@ -28,15 +29,15 @@ type Result struct {
 
 var client = &http.Client{}
 
-// Submit a source code from submission to Judge0 api
+// Submit a source code from submission to Judge0 api Ou
 func Submit(langID int, source, input, expectedOutput string) *Result {
 	url := fmt.Sprintf("http://%s:%s/submissions?wait=true", os.Getenv("JUDGE_0_IP"), os.Getenv("JUDGE_0_PORT"))
 
-	// remove quotes
-	input = input[1 : len(input)-1]
-	expectedOutput = expectedOutput[1 : len(expectedOutput)-1]
+	req := map[string]string{"source_code": source, "stdin": input, "language_id": strconv.Itoa(langID)}
 
-	req := map[string]string{"source_code": source, "stdin": input, "language_id": strconv.Itoa(langID), "expected_output": expectedOutput}
+	if expectedOutput != "" {
+		req["expected_output"] = expectedOutput
+	}
 
 	//convert request to io.Reader
 	reqByte, _ := json.Marshal(req)
@@ -48,8 +49,7 @@ func Submit(langID int, source, input, expectedOutput string) *Result {
 	}
 	defer res.Body.Close()
 
-	var result *Result
-	result = new(Result)
+	result := new(Result)
 	json.NewDecoder(res.Body).Decode(result)
 	return result
 }

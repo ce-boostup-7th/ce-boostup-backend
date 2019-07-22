@@ -7,13 +7,13 @@ import (
 	"github.com/labstack/echo"
 )
 
-// Logout log out
+// Logout log out Ou
 func Logout(c echo.Context) error {
 
 	cookie := new(http.Cookie)
 	cookie.Name = "JWT_Token"
 	cookie.Value = ""
-	cookie.Expires = time.Now().Add(1 * time.Microsecond)
+	cookie.Expires = time.Unix(0, 0);
 	c.SetCookie(cookie)
 
 	return c.String(http.StatusOK, "logged out")

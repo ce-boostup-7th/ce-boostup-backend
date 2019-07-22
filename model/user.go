@@ -1,7 +1,7 @@
 package model
 
 import (
-	"ce-boostup-backend/db"
+	"../db"
 	"fmt"
 )
 
@@ -94,17 +94,18 @@ func DeleteUserWithSpecificID(id int) error {
 	return nil
 }
 
-//PasswordByUsername get password by username
-func PasswordByUsername(username string) (*string, error) {
-	statement := `SELECT password FROM grader_user WHERE username=$1`
+//IDPasswordByUsername get password by username
+func IDPasswordByUsername(username string) (*int, *string, error) {
+	statement := `SELECT id, password FROM public.grader_user WHERE username=$1`
 	row := db.DB.QueryRow(statement, username)
 
+	var id int
 	var password string
-	err := row.Scan(&password)
+	err := row.Scan(&id, &password)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return &password, nil
+	return &id, &password, nil
 }
 
 //IsUserExist check if user exists

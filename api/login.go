@@ -1,7 +1,7 @@
 package api
 
 import (
-	"ce-boostup-backend/model"
+	"../model"
 	"net/http"
 	"os"
 	"time"
@@ -12,67 +12,46 @@ import (
 	"github.com/labstack/echo"
 )
 
-//Login authorize and return a cookie
+// Login authorize and return a cookie Ou
 func Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
 	isExist, _ := model.IsUserExist(username)
-
 	//Throws unanthorized error
 	if !(*isExist) {
 		return c.JSON(http.StatusNotFound, "cannot found that user")
 	}
-
-	//Throws unauthorized error
-	if !isPasswordCorrect(username, password) {
-		return c.JSON(http.StatusUnauthorized, "password is wrong")
+	userID, hashedPassword, err := model.IDPasswordByUsername(username)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Incorrect Username or Password")
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(*hashedPassword), []byte(password))
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "Incorrect Username or Password")
 	}
 
 	// Create token
 	token := jwt.New(jwt.SigningMethodHS256)
-
-	userID, err := model.IDByUsername(username)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
+	endTime := time.Now().Add(time.Hour * 24)
 
 	//Set claims
 	claims := token.Claims.(jwt.MapClaims)
 	claims["userID"] = userID
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	claims["exp"] = endTime.Unix()
 
 	//Generate encoded token and send it as response
 	t, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, err)
+		return c.String(http.StatusInternalServerError, "contact admin")
 	}
 
 	cookie := new(http.Cookie)
 	cookie.HttpOnly = false
 	cookie.Name = "JWT_Token"
 	cookie.Value = t
-	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.Expires = endTime
 	c.SetCookie(cookie)
 
 	return c.String(http.StatusOK, "logged in")
-}
-
-//Accessible accessible without authentication
-func Accessible(c echo.Context) error {
-	return c.String(http.StatusOK, "Accessible")
-}
-
-//Restricted cannot access without authentication
-func Restricted(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	name := claims["name"].(string)
-	return c.String(http.StatusOK, "Welcome "+name+"!")
-}
-
-func isPasswordCorrect(username string, password string) bool {
-	hashedPassword, _ := model.PasswordByUsername(username)
-	err := bcrypt.CompareHashAndPassword([]byte(*hashedPassword), []byte(password))
-	return err == nil
 }
