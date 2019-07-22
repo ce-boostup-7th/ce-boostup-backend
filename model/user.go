@@ -107,6 +107,27 @@ func PasswordByUsername(username string) (*string, error) {
 	return &password, nil
 }
 
+//IsUserExist check if user exists
+func IsUserExist(username string) (*bool, error) {
+	var isExist bool
+	var str string
+
+	statement := `SELECT EXISTS(SELECT * FROM grader_user WHERE username=$1)`
+	row := db.DB.QueryRow(statement, username)
+	err := row.Scan(&str)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if str == "true" {
+		isExist = true
+	} else if str == "false" {
+		isExist = false
+	}
+	return &isExist, nil
+}
+
 //IDByUsername get user id by username
 func IDByUsername(username string) (*int, error) {
 	statement := `SELECT id FROM grader_user WHERE username=$1`

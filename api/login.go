@@ -17,9 +17,16 @@ func Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
+	isExist, _ := model.IsUserExist(username)
+
+	//Throws unanthorized error
+	if !(*isExist) {
+		return c.JSON(http.StatusNotFound, "cannot found that user")
+	}
+
 	//Throws unauthorized error
 	if !isPasswordCorrect(username, password) {
-		return echo.ErrUnauthorized
+		return c.JSON(http.StatusUnauthorized, "password is wrong")
 	}
 
 	// Create token
@@ -27,7 +34,7 @@ func Login(c echo.Context) error {
 
 	userID, err := model.IDByUsername(username)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, err)
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	//Set claims
