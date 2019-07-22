@@ -12,6 +12,18 @@ import (
 	"github.com/labstack/echo"
 )
 
+//RespSuccess struct for json return
+type RespSuccess struct {
+	ID  int    `json:"id"`
+	Msg string `json:"msg"`
+}
+
+//RespError struct for json return
+type RespError struct {
+	Msg string `json:"msg"`
+	Err error  `json:"err"`
+}
+
 // Login authorize and return a cookie Ou
 func Login(c echo.Context) error {
 	username := c.FormValue("username")
@@ -20,7 +32,7 @@ func Login(c echo.Context) error {
 	isExist, _ := model.IsUserExist(username)
 	//Throws unanthorized error
 	if !(*isExist) {
-		return c.JSON(http.StatusNotFound, "cannot found that user")
+		return c.String(http.StatusNotFound, "cannot found that user")
 	}
 
 	userID, hashedPassword, err := model.IDPasswordByUsername(username)
