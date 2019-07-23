@@ -75,6 +75,24 @@ func NewSubmission(userID int, problemID int, languageID int, src string) (*Subm
 			resultsArr[index] = 'I'
 		default:
 			resultsArr[index] = 'X'
+			switch result.Status.ID {
+			case 1:
+				result.CompileOutput = "In Queue"
+			case 2:
+				result.CompileOutput = "Processing"
+			case 7:
+				result.CompileOutput = "Runtime Error (SIGSEGV)"
+			case 8:
+				result.CompileOutput = "Runtime Error (SIGXFSZ)"
+			case 9:
+				result.CompileOutput = "Runtime Error (SIGFPE)"
+			case 10:
+				result.CompileOutput = "Runtime Error (SIGABRT)"
+			case 11:
+				result.CompileOutput = "Runtime Error (NZEC)"
+			case 12:
+				result.CompileOutput = "Runtime Error (Other)"
+			}
 		}
 		submission.CompileOutput = result.CompileOutput
 	}
