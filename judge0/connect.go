@@ -1,11 +1,11 @@
 package judge0
 
 import (
+	"encoding/base64"
 	"strings"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -33,12 +33,15 @@ var client = &http.Client{}
 
 // Submit a source code from submission to Judge0 api Ou
 func Submit(langID int, source, input, expectedOutput string) *Result {
-	url := fmt.Sprintf("http://%s:%s/submissions?wait=true", os.Getenv("JUDGE_0_IP"), os.Getenv("JUDGE_0_PORT"))
+	url := fmt.Sprintf("http://%s:%s/submissions?base64_encoded=true&wait=true", os.Getenv("JUDGE_0_IP"), os.Getenv("JUDGE_0_PORT"))
+
+	source = base64.StdEncoding.EncodeToString([]byte(source))
+	input = base64.StdEncoding.EncodeToString([]byte(input))
 
 	req := map[string]string{"source_code": source, "stdin": input, "language_id": strconv.Itoa(langID)}
 
 	if expectedOutput != "" {
-		req["expected_output"] = expectedOutput
+		req["expected_output"] = base64.StdEncoding.EncodeToString([]byte(expectedOutput))
 	}
 
 	//convert request to io.Reader
@@ -47,7 +50,7 @@ func Submit(langID int, source, input, expectedOutput string) *Result {
 
 	res, err := client.Post(url, "application/json", reqReader)
 	if err != nil {
-		log.Fatal(err)
+		return nil
 	}
 	defer res.Body.Close()
 
@@ -57,9 +60,21 @@ func Submit(langID int, source, input, expectedOutput string) *Result {
 		if result.Stdout == nil {
 			result.Stdout = new(string)
 		}
-		if strings.TrimSpace(*result.Stdout) != "" {
+		decoded, err := base64.StdEncoding.DecodeString(*result.Stdout)
+		if err != nil {
+			fmt.Println("decode error:", err)
+			return nil
+		}
+		if strings.TrimSpace(string(decoded)) != "" {
 			result.Status.ID = 4
 		}
 	}
+	decoded, err := base64.StdEncoding.DecodeString(result.CompileOutput)
+	if err != nil {
+		fmt.Println("decode error:", err)
+		return nil
+	}
+	result.CompileOutput = string(decoded)
+
 	return result
 }

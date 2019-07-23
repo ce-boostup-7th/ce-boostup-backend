@@ -36,12 +36,7 @@ func NewSubmission(userID int, problemID int, languageID int, src string) (*Subm
 	submission.ProblemID = problemID
 	submission.LanguageID = languageID
 	submission.Src = src
-	// submission.Score = 0
 	submission.MaxScore = len(testcases)
-	// submission.Runtime = 0
-	// submission.MemoryUsage = 0
-	// submission.Results = ""
-	// submission.CompileOutput = ""
 	
 	resultsArr := make([]byte, len(testcases))
 
