@@ -25,7 +25,7 @@ type OverallSubmission struct {
 type History struct {
 	ProblemID	int `json:"problem_id"`
 	Title		string `json:"title"`
-	Percen		float32 `json:"percen"`
+	Results		string `json:"results"`
 	LastDo		string `json:"last_do"`
 }
 
@@ -135,27 +135,26 @@ order by allProblem.categoryid`
 	statistic.ProgressArray = progressArr
 
 	statement = 
-`select submission.problem_id, problem.title, submission.percen, submission.last_do
+`select submission.problem_id, problem.title, submission.results, submission.last_do
 from (
-	select public.submission.problem_id,
-		max(public.submission.submittedat) as last_do,
-		max(public.submission.score * 100.0 / public.submission.max_score) as percen
-	from public.submission
-	where public.submission.usr_id = $1
+	select distinct on (submission.problem_id) public.submission.problem_id, public.submission.submittedat as last_do, public.submission.results, submission.submission_id
+		from public.submission
+		where public.submission.usr_id = $1
 		and public.submission.problem_id not in (
-			select public.submission.problem_id 
+			select public.submission.problem_id
 			from public.submission
-			where public.submission.score = public.submission.max_score
+			where public.submission.usr_id = $1
+			and public.submission.score = public.submission.max_score
 			group by public.submission.problem_id
 		)
-	group by public.submission.problem_id
+	order by submission.problem_id, submission.submission_id desc
 ) as submission
 inner join (
 	select public.problem.id, public.problem.title
 	from public.problem
 ) as problem
 on submission.problem_id = problem.id
-order by submission.last_do desc
+order by submission.submission_id desc
 limit 4`
 	rows, err = db.DB.Query(statement, id)
 	if err != nil {
@@ -167,7 +166,7 @@ limit 4`
 	for rows.Next() {
 		history := new(History)
 
-		err := rows.Scan(&history.ProblemID, &history.Title, &history.Percen, &history.LastDo)
+		err := rows.Scan(&history.ProblemID, &history.Title, &history.Results, &history.LastDo)
 		if err != nil {
 			return nil, err
 		}
