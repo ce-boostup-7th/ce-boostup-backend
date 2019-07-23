@@ -3,6 +3,7 @@ package model
 import (
 	"../db"
 	"fmt"
+	"database/sql"
 )
 
 //User a grader user model
@@ -109,8 +110,11 @@ func IDPasswordByUsername(username string) (*int, *string, error) {
 	var id int
 	var password string
 	err := row.Scan(&id, &password)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		id = -1
+	} else if err != nil {
 		return nil, nil, err
 	}
+
 	return &id, &password, nil
 }

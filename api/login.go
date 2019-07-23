@@ -19,11 +19,14 @@ func Login(c echo.Context) error {
 
 	userID, hashedPassword, err := model.IDPasswordByUsername(username)
 	if err != nil {
-		return c.String(http.StatusUnauthorized, "Incorrect Username or Password")
+		return c.String(http.StatusInternalServerError, "CallStaff")
+	}
+	if *userID == -1 {
+		return c.String(http.StatusNotFound, "NoUser")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(*hashedPassword), []byte(password))
 	if err != nil {
-		return c.String(http.StatusUnauthorized, "Incorrect Username or Password")
+		return c.String(http.StatusUnauthorized, "IncorrectPassword")
 	}
 
 	// Create token
