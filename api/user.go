@@ -57,7 +57,10 @@ func UpdateUser(c echo.Context) error {
 	id, _ := conversion.StringToInt(str)
 
 	userPtr, _ := model.SpecificUserWithID(id)
-	user := *userPtr
+	user := new(model.User)
+	user.ID = userPtr.ID
+	user.Username = userPtr.Username
+	user.Score = userPtr.Score
 
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
@@ -67,7 +70,7 @@ func UpdateUser(c echo.Context) error {
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	user.Password = string(bytes)
 
-	err := model.UpdateUser(user)
+	err := model.UpdateUser(*user)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}
