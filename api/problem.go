@@ -208,6 +208,34 @@ func GetTestcaseWithID(c echo.Context) error {
 			Err: err,
 		})
 	}
+	
+	lent := len(testcase)
+	if lent > 3 {
+		lent = 3
+	}
+
+	testcase = testcase[0:lent]
+
+	return c.JSON(http.StatusOK, testcase)
+}
+
+// GetTestcaseWithIDAll get testcase from judge0 Ou
+func GetTestcaseWithIDAll(c echo.Context) error {
+	id, err := conversion.StringToInt(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
+	}
+
+	testcase, err := model.SpecificTestcaseWithID(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Not found any testcase",
+			Err: err,
+		})
+	}
 	return c.JSON(http.StatusOK, testcase)
 }
 
