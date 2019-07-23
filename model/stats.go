@@ -103,15 +103,19 @@ func SpecificUserStatWithID(id int) (*Statistic, error) {
 	allProblem.categoryid,
 	(case when userStats.count is NULL THEN 0 ELSE userStats.count END) as completed,
 	allProblem.count as all
-from (select public.problem.categoryid, count(public.problem.categoryid)
+from (
+	select public.problem.categoryid, count(public.problem.categoryid)
 	from public.submission
 	inner join public.problem
 	on public.submission.problem_id = public.problem.id 
 	where public.submission.score = public.submission.max_score and public.submission.usr_id = $1
-	group by public.problem.categoryid) as userStats
-full outer join (select public.problem.categoryid, count(public.problem.categoryid)
+	group by public.problem.categoryid
+) as userStats
+full outer join (
+	select public.problem.categoryid, count(public.problem.categoryid)
 	from public.problem
-	group by public.problem.categoryid) as allProblem
+	group by public.problem.categoryid
+) as allProblem
 on userStats.categoryid = allProblem.categoryid
 order by allProblem.categoryid`
 	rows, err := db.DB.Query(statement, id)
