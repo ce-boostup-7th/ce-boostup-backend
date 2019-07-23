@@ -1,6 +1,7 @@
 package judge0
 
 import (
+	"strings"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -22,6 +23,7 @@ type Result struct {
 	Time			string 	`json:"time"`
 	Memory			int    	`json:"memory"`
 	CompileOutput	string	`json:"compile_output"`
+	Stdout			*string `json:"stdout"`
 	Status struct {
 		ID int `json:"id"` // 3 for correct 4 for incorrect
 	} `json:"status"`
@@ -51,5 +53,13 @@ func Submit(langID int, source, input, expectedOutput string) *Result {
 
 	result := new(Result)
 	json.NewDecoder(res.Body).Decode(result)
+	if expectedOutput == "" {
+		if result.Stdout == nil {
+			result.Stdout = new(string)
+		}
+		if strings.TrimSpace(*result.Stdout) != "" {
+			result.Status.ID = 4
+		}
+	}
 	return result
 }
