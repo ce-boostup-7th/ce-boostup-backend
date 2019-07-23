@@ -54,6 +54,11 @@ func NewSubmission(userID int, problemID int, languageID int, src string) (*Subm
 		result := <- ch
 		index := <- chIndex
 
+		if result == nil {
+			resultsArr[index] = 'B'
+			continue
+		}
+
 		submission.MemoryUsage += result.Memory
 		submission.Runtime += conversion.StringToFloat(result.Time)
 		switch result.Status.ID {
