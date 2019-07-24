@@ -23,6 +23,21 @@ type Submission struct {
 	CompileOutput 	string	`json:"compile_output" form:"compile_output"`
 }
 
+// SubmissionNoSrc a model for submission Ou
+type SubmissionNoSrc struct {
+	SubmissionID 	int     `json:"submission_id"`
+	UserID       	int     `json:"user_id"`
+	ProblemID    	int     `json:"problem_id"`
+	LanguageID   	int     `json:"language_id"`
+	SubmittedAt  	string  `json:"submitted_at"`
+	Score        	int     `json:"score"`
+	MaxScore     	int     `json:"max_score"`
+	Runtime      	float64 `json:"runtime"`
+	MemoryUsage  	int     `json:"memory_usage"`
+	Results			string 	`json:"results"`
+	CompileOutput 	string	`json:"compile_output"`
+}
+
 // NewSubmission create a new submission ou
 func NewSubmission(userID int, problemID int, languageID int, src string) (*Submission, error) {
 	testcases, err := SpecificTestcaseWithID(problemID)
@@ -135,7 +150,7 @@ var baseSQL = `SELECT submission_id, src, usr_id, problem_id, lang_id, submitted
 	FROM public.submission`
 
 // AllSubmissions get all submissions Ou
-func AllSubmissions() ([]*Submission, error) {
+func AllSubmissions() ([]*SubmissionNoSrc, error) {
 	rows, err := db.DB.Query( baseSQL + " ORDER BY submission_id")
 	if err != nil {
 		return nil, err
@@ -146,7 +161,26 @@ func AllSubmissions() ([]*Submission, error) {
 		return nil, err
 	}
 
-	return submissions, nil
+	submissionsNoSrc := make([]*SubmissionNoSrc, 0)
+
+	for _, val := range submissions {
+		submissionNoSrc := new(SubmissionNoSrc)
+		submissionNoSrc.SubmissionID = val.SubmissionID
+		submissionNoSrc.UserID = val.UserID
+		submissionNoSrc.ProblemID = val.ProblemID
+		submissionNoSrc.LanguageID = val.LanguageID
+		submissionNoSrc.SubmittedAt = val.SubmittedAt
+		submissionNoSrc.Score = val.Score
+		submissionNoSrc.MaxScore = val.MaxScore
+		submissionNoSrc.Runtime = val.Runtime
+		submissionNoSrc.MemoryUsage = val.MemoryUsage
+		submissionNoSrc.Results = val.Results
+		submissionNoSrc.CompileOutput = val.CompileOutput
+
+		submissionsNoSrc = append(submissionsNoSrc, submissionNoSrc)
+	}
+
+	return submissionsNoSrc, nil
 }
 
 // AllSubmissionsFilteredByUserID filter all user that filtered by userID Ou
