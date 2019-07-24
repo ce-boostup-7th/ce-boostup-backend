@@ -59,6 +59,26 @@ func GetAllProblems(c echo.Context) error {
 	return c.JSON(http.StatusOK, problems)
 }
 
+// GetAllProblemsWithUserProgres get all problems Ou
+func GetAllProblemsWithUserProgres(c echo.Context) error {
+	userID, err := getUserID(c)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Invalid TOKEN",
+			Err: err,
+		})
+	}
+
+	problems, err := model.GetAllProblemsWithUserProgres(userID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Not found any problem",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusOK, problems)
+}
+
 // GetProblemWithID get specific problem by id Ou
 func GetProblemWithID(c echo.Context) error {
 	id, err := conversion.StringToInt(c.Param("id"))

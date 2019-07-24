@@ -47,6 +47,7 @@ func Init() *echo.Echo {
 	e.GET("/submissions/:id", api.GetSubmissionWithID)
 
 	e.GET("/users/submissions", api.GetAllSubmissionsOfUser)
+	e.GET("/users/problems", api.GetAllProblemsWithUserProgres)
 	e.GET("/problems/:pid/submissions/last", api.GetLastUserSubmissionsFilteredByProblemID)
 
 	// ---------- only admin ----------

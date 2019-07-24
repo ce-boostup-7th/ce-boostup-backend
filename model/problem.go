@@ -22,6 +22,15 @@ type Problem struct {
 	UpdatedAt   string `json:"updated_at" form:"updated_at"` //time updated
 }
 
+// ProblemWithUserStat a problem model
+type ProblemWithUserStat struct {
+	ID          int    	`json:"id"`
+	CategoryID  int    	`json:"category_id"`
+	Title       string 	`json:"title"`
+	Difficulty  int    	`json:"difficulty"`
+	Percent		float32	`json:"percent"`
+}
+
 //NewProblem add new problem
 func NewProblem(title string, categoryID int, difficulty int, description string) (*int, error) {
 	var problemID int
@@ -48,6 +57,49 @@ func AllProblems() ([]*Problem, error) {
 		problem := new(Problem)
 
 		err := rows.Scan(&problem.ID, &problem.Title, &problem.Description, &problem.CategoryID, &problem.Difficulty, &problem.CreatedAt, &problem.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		problems = append(problems, problem)
+	}
+
+	return problems, nil
+}
+
+// GetAllProblemsWithUserProgres return all problems in db
+func GetAllProblemsWithUserProgres(uid int) ([]*ProblemWithUserStat, error) {
+	statement :=
+`
+select 
+	problem.id,
+	problem.title,
+	problem.categoryid,
+	problem.difficulty,
+	(case when submission.max is NULL THEN -1 ELSE submission.max END) as percent
+from public.problem as problem
+left join
+(
+	select
+		public.submission.problem_id,
+		max(public.submission.score * 100.0 / public.submission.max_score)
+	from public.submission
+	where public.submission.usr_id = $1
+	group by public.submission.problem_id
+) as submission
+on problem.id = submission.problem_id
+order by problem.id
+`
+	rows, err := db.DB.Query(statement, uid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	problems := make([]*ProblemWithUserStat, 0)
+	for rows.Next() {
+		problem := new(ProblemWithUserStat)
+
+		err := rows.Scan(&problem.ID, &problem.Title, &problem.CategoryID, &problem.Difficulty, &problem.Percent)
 		if err != nil {
 			return nil, err
 		}
