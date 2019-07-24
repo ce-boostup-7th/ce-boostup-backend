@@ -231,8 +231,10 @@ order by public.grader_user.score`
 	max := scores[len(scores) - 1]
 
 	histograms := [5]int{0, 0, 0, 0, 0}
-	for _, v := range scores {
-		histograms[int(float32(v - min) / float32(max - min) * 4)]++
+	if !(min == 0.0 && max == 0.0) {
+		for _, v := range scores {
+			histograms[int(float32(v - min) / float32(max - min) * 4)]++
+		}
 	}
 
 	histograms[3] += histograms[4]
@@ -244,8 +246,8 @@ order by public.grader_user.score`
 		histogramOut := new(Histogram)
 
 		histogramOut.Amount = v
-		histogramOut.Start = float32(max-min) / 4.0 * float32(k)
-		histogramOut.Stop = float32(max-min) / 4.0 * float32(k + 1)
+		histogramOut.Start = (float32(max-min) / 4.0 * float32(k)) + float32(min)
+		histogramOut.Stop = (float32(max-min) / 4.0 * float32(k + 1)) + float32(min)
 
 		histogramsOut = append(histogramsOut, histogramOut)
 	}
