@@ -69,6 +69,7 @@ func Submit(langID int, source, input, expectedOutput string) *Result {
 			result.Status.ID = 4
 		}
 	}
+
 	decoded, err := base64.StdEncoding.DecodeString(result.CompileOutput)
 	if err != nil {
 		fmt.Println("decode error:", err)

@@ -47,6 +47,7 @@ func Init() *echo.Echo {
 	e.GET("/submissions/:id", api.GetSubmissionWithID)
 
 	e.GET("/users/submissions", api.GetAllSubmissionsOfUser)
+	e.GET("/problems/:pid/submissions/last", api.GetLastUserSubmissionsFilteredByProblemID)
 
 	// ---------- only admin ----------
 	r := e.Group("/Ad-0Fj_kL8me")

@@ -164,6 +164,22 @@ func AllSubmissionsFilteredByUserID(uid int) ([]*Submission, error) {
 	return submissions, nil
 }
 
+// LastUserSubmissionsFilteredByProblemID filter all user that filtered by userID Ou
+func LastUserSubmissionsFilteredByProblemID(uid int, pid int) (*Submission, error) {
+	row := db.DB.QueryRow(baseSQL + ` 
+where public.submission.problem_id = $2
+and public.submission.usr_id = $1
+order by public.submission.submission_id desc
+limit 1`, uid, pid)
+
+	submission, err := scanSubmissionRow(row)
+	if err != nil {
+		return nil, err
+	}
+
+	return submission, nil
+}
+
 // SpecificSubmission return a specific submission by id Ou
 func SpecificSubmission(id int) (*Submission, error) {
 	row := db.DB.QueryRow(baseSQL + " WHERE submission_id=$1", id)
