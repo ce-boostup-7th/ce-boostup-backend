@@ -14,6 +14,8 @@ func Logout(c echo.Context) error {
 	cookie.Name = "JWT_Token"
 	cookie.Value = ""
 	cookie.Expires = time.Unix(0, 0);
+	cookie.Path = "/"
+	cookie.HttpOnly = false
 	c.SetCookie(cookie)
 
 	return c.String(http.StatusOK, "logged out")

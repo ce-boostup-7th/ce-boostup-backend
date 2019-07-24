@@ -45,10 +45,11 @@ func Login(c echo.Context) error {
 	}
 
 	cookie := new(http.Cookie)
-	cookie.HttpOnly = false
 	cookie.Name = "JWT_Token"
 	cookie.Value = t
 	cookie.Expires = endTime
+	cookie.Path = "/"
+	cookie.HttpOnly = false
 	c.SetCookie(cookie)
 
 	return c.String(http.StatusOK, "logged in")
