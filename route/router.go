@@ -15,12 +15,13 @@ func Init() *echo.Echo {
 
 	// config CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{
+		AllowOrigins: []string{
 			"http://localhost:1234",
 			"http://problem-injector.surge.sh",
 			"https://ceboostup.netlify.com",
 			"http://boostup-demo.surge.sh",
 			"http://ce.19991999.xyz",
+			"https://ce.19991999.xyz",
 		},
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 		AllowCredentials: true,
