@@ -4,7 +4,10 @@ import (
 	"../conversion"
 	"../model"
 	"net/http"
+	"fmt"
+	"os"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -97,4 +100,29 @@ func DeleteUserWithSpecificID(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.String(http.StatusOK, "deleted")
+}
+
+func getUserID(c echo.Context) (int, error) {
+	// read a cookie
+	cookie, err := c.Cookie("JWT_Token")
+	if err != nil {
+		return -1, err
+	}
+
+	jwtString := cookie.Value
+	claims := jwt.MapClaims{}
+	_, err = jwt.ParseWithClaims(jwtString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("SECRET_KEY")), nil
+	})
+	if err != nil {
+		return -1, err
+	}
+
+	userIDStr := fmt.Sprintf("%v", claims["userID"])
+	userID, err := conversion.StringToInt(userIDStr)
+	if err != nil {
+		return -1, err
+	}
+
+	return userID, nil
 }
