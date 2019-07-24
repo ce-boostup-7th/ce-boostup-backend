@@ -21,7 +21,7 @@ func CreateUser(c echo.Context) error {
 	}
 
 	//hash a password
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	err := model.NewUser(user.Username, string(bytes))
 	if err != nil {
