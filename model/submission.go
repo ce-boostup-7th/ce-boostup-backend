@@ -203,7 +203,19 @@ func DeleteAllSubmissions() error {
 }
 
 func collectScore(id int) error {
-	statement := `UPDATE grader_user SET score=(SELECT SUM(max) FROM (SELECT problem_id,MAX(score) FROM submission WHERE usr_id=$1 GROUP BY submission.problem_id) AS PREP) WHERE id=$1;`
+	statement := 
+`update public.grader_user
+set score = (
+	select sum(max) from (
+		select max(public.submission.score * 10.0 / public.submission.max_score) * public.problem.difficulty as max
+		from public.submission
+		inner join public.problem
+		on public.submission.problem_id = public.problem.id
+		where public.submission.usr_id = $1
+		group by public.submission.problem_id, public.problem.difficulty
+	) as score
+)
+where public.grader_user.id = $1`
 	_, err := db.DB.Exec(statement, id)
 	if err != nil {
 		return err
