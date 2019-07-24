@@ -20,10 +20,14 @@ type RespError struct {
   Err error `json:"err"`
 }
 
-// RespSingleProblem struct for json return
+//RespSingleProblem a problem model
 type RespSingleProblem struct {
-  	Problem model.Problem `json:"problem"`
-	Testcase []*model.Testcase `json:"testcase"`
+	ID          int    `json:"id"`
+	CategoryID  int    `json:"category_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Difficulty  int    `json:"difficulty"`
+	Testcase	[]*model.Testcase `json:"testcase"`
 }
 
 // CreateProblem create a new problem Ou
@@ -114,8 +118,12 @@ func GetProblemWithID(c echo.Context) error {
 	
 	respSingleProblem := new(RespSingleProblem)
 
-	respSingleProblem.Problem = *problem
+	respSingleProblem.CategoryID = problem.CategoryID
+	respSingleProblem.Description = problem.Description
+	respSingleProblem.Difficulty = problem.Difficulty
+	respSingleProblem.ID = problem.ID
 	respSingleProblem.Testcase = testcase
+	respSingleProblem.Title = problem.Title
 
 	return c.JSON(http.StatusOK, respSingleProblem)
 }
