@@ -7,12 +7,12 @@ import (
 //Statistic a stat of grader user
 type Statistic struct {
 	Name          string               `json:"name"`
-	Score         int                  `json:"score"`
+	Score         float64              `json:"score"`
 	ProgressArray []*Progress          `json:"progress_array"`
 	Overall       []*OverallSubmission `json:"overall"`
 	UserHistory   []*History           `json:"history"`
 	ActivePulse   []*Pulse             `json:"active_pulse"`
-	Histogram     []*Histogram            `json:"histogram"`
+	Histogram     []*Histogram         `json:"histogram"`
 }
 
 // OverallSubmission get the overall submission data of user
@@ -211,9 +211,9 @@ order by public.grader_user.score`
 	}
 	defer rows.Close()
 
-	scores := make([]int, 0)
+	scores := make([]float64, 0)
 	for rows.Next() {
-		score := 0
+		score := 0.0
 
 		err := rows.Scan(&score)
 		if err != nil {
@@ -242,9 +242,6 @@ order by public.grader_user.score`
 		histogramOut.Amount = v
 		histogramOut.Start = float32(max-min) / 4.0 * float32(k)
 		histogramOut.Stop = float32(max-min) / 4.0 * float32(k + 1)
-		if k != 3 {
-			histogramOut.Stop--
-		}
 
 		histogramsOut = append(histogramsOut, histogramOut)
 	}
