@@ -22,6 +22,7 @@ func Init() *echo.Echo {
 			"http://boostup-demo.surge.sh",
 			"http://ce.19991999.xyz",
 			"https://ce.19991999.xyz",
+			"http://stafftest.19991999.xyz",
 		},
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 		AllowCredentials: true,
