@@ -33,7 +33,13 @@ func NewUser(username string, password string) error {
 
 //AllUsers Get all users info from db
 func AllUsers() ([]*UserRes, error) {
-	rows, err := db.DB.Query("SELECT public.grader_user.id, public.grader_user.username, public.grader_user.score FROM public.grader_user ORDER BY id")
+	rows, err := db.DB.Query(
+		`SELECT
+			public.grader_user.id,
+			public.grader_user.username,
+			public.grader_user.score
+		FROM public.grader_user ORDER BY score desc
+		limit 10`)
 	if err != nil {
 		return nil, err
 	}
