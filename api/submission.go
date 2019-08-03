@@ -1,13 +1,9 @@
 package api
 
 import (
-	"ce-boostup-backend/conversion"
-	"ce-boostup-backend/model"
-	"fmt"
+	"../conversion"
+	"../model"
 	"net/http"
-	"os"
-
-	"github.com/dgrijalva/jwt-go"
 
 	"github.com/labstack/echo"
 )
@@ -22,32 +18,10 @@ func CreateSubmission(c echo.Context) error {
 		})
 	}
 
-	// read a cookie
-	cookie, err := c.Cookie("JWT_Token")
+	userID, err := getUserID(c)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &RespError{
+		return c.JSON(http.StatusNotFound, &RespError{
 			Msg: "Invalid TOKEN",
-			Err: err,
-		})
-	}
-
-	jwtString := cookie.Value
-	claims := jwt.MapClaims{}
-	_, err = jwt.ParseWithClaims(jwtString, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("SECRET_KEY")), nil
-	})
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &RespError{
-			Msg: "Invalid TOKEN",
-			Err: err,
-		})
-	}
-
-	userIDStr := fmt.Sprintf("%v", claims["userID"])
-	userID, err := conversion.StringToInt(userIDStr)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &RespError{
-			Msg: "ID can only be integer",
 			Err: err,
 		})
 	}
@@ -76,32 +50,10 @@ func GetAllSubmissions(c echo.Context) error {
 
 // GetAllSubmissionsOfUser get all submissions of specific user Ou
 func GetAllSubmissionsOfUser(c echo.Context) error {
-	// read a cookie
-	cookie, err := c.Cookie("JWT_Token")
+	userID, err := getUserID(c)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &RespError{
+		return c.JSON(http.StatusNotFound, &RespError{
 			Msg: "Invalid TOKEN",
-			Err: err,
-		})
-	}
-
-	jwtString := cookie.Value
-	claims := jwt.MapClaims{}
-	_, err = jwt.ParseWithClaims(jwtString, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("SECRET_KEY")), nil
-	})
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &RespError{
-			Msg: "Invalid TOKEN",
-			Err: err,
-		})
-	}
-
-	userIDStr := fmt.Sprintf("%v", claims["userID"])
-	userID, err := conversion.StringToInt(userIDStr)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &RespError{
-			Msg: "ID can only be integer",
 			Err: err,
 		})
 	}
@@ -127,6 +79,34 @@ func GetSubmissionWithID(c echo.Context) error {
 	}
 
 	submission, err := model.SpecificSubmission(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Not found this problem",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusOK, submission)
+}
+
+// GetLastUserSubmissionsFilteredByProblemID get a specific submission by id Ou
+func GetLastUserSubmissionsFilteredByProblemID(c echo.Context) error {
+	pid, err := conversion.StringToInt(c.Param("pid"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "PID can only be integer",
+			Err: err,
+		})
+	}
+
+	uid, err := getUserID(c)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Invalid TOKEN",
+			Err: err,
+		})
+	}
+
+	submission, err := model.LastUserSubmissionsFilteredByProblemID(uid, pid)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, &RespError{
 			Msg: "Not found this problem",

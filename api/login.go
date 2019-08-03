@@ -37,11 +37,14 @@ func Login(c echo.Context) error {
 
 	userID, hashedPassword, err := model.IDPasswordByUsername(username)
 	if err != nil {
-		return c.String(http.StatusUnauthorized, "Incorrect Password")
+		return c.String(http.StatusInternalServerError, "CallStaff")
+	}
+	if *userID == -1 {
+		return c.String(http.StatusNotFound, "NoUser")
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(*hashedPassword), []byte(password))
 	if err != nil {
-		return c.String(http.StatusUnauthorized, "Incorrect Password")
+		return c.String(http.StatusUnauthorized, "IncorrectPassword")
 	}
 
 	// Create token
@@ -60,10 +63,11 @@ func Login(c echo.Context) error {
 	}
 
 	cookie := new(http.Cookie)
-	cookie.HttpOnly = false
 	cookie.Name = "JWT_Token"
 	cookie.Value = t
 	cookie.Expires = endTime
+	cookie.Path = "/"
+	cookie.HttpOnly = false
 	c.SetCookie(cookie)
 
 	return c.String(http.StatusOK, "logged in")

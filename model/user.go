@@ -3,6 +3,7 @@ package model
 import (
 	"ce-boostup-backend/db"
 	"fmt"
+	"database/sql"
 )
 
 //User a grader user model
@@ -10,6 +11,13 @@ type User struct {
 	ID       int     `json:"id" form:"id"`
 	Username string  `json:"username" form:"username"`
 	Password string  `json:"password" form:"password"`
+	Score    float64 `json:"score" form:"score"`
+}
+
+// UserRes a grader user model
+type UserRes struct {
+	ID       int     `json:"id" form:"id"`
+	Username string  `json:"username" form:"username"`
 	Score    float64 `json:"score" form:"score"`
 }
 
@@ -24,18 +32,24 @@ func NewUser(username string, password string) error {
 }
 
 //AllUsers Get all users info from db
-func AllUsers() ([]*User, error) {
-	rows, err := db.DB.Query("SELECT * FROM grader_user ORDER BY id")
+func AllUsers() ([]*UserRes, error) {
+	rows, err := db.DB.Query(
+		`SELECT
+			public.grader_user.id,
+			public.grader_user.username,
+			public.grader_user.score
+		FROM public.grader_user ORDER BY score desc
+		limit 10`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	users := make([]*User, 0)
+	users := make([]*UserRes, 0)
 	for rows.Next() {
-		user := new(User)
+		user := new(UserRes)
 
-		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Score)
+		err := rows.Scan(&user.ID, &user.Username, &user.Score)
 		if err != nil {
 			return nil, err
 		}
@@ -50,13 +64,13 @@ func AllUsers() ([]*User, error) {
 }
 
 //SpecificUserWithID return specific user from db by using id
-func SpecificUserWithID(id int) (*User, error) {
-	statement := `SELECT * FROM grader_user WHERE id=$1`
+func SpecificUserWithID(id int) (*UserRes, error) {
+	statement := `SELECT public.grader_user.id, public.grader_user.username, public.grader_user.score FROM public.grader_user WHERE id=$1`
 	row := db.DB.QueryRow(statement, id)
 
-	user := new(User)
+	user := new(UserRes)
 
-	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Score)
+	err := row.Scan(&user.ID, &user.Username, &user.Score)
 	if err != nil {
 		return nil, err
 	}
@@ -102,9 +116,12 @@ func IDPasswordByUsername(username string) (*int, *string, error) {
 	var id int
 	var password string
 	err := row.Scan(&id, &password)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		id = -1
+	} else if err != nil {
 		return nil, nil, err
 	}
+
 	return &id, &password, nil
 }
 

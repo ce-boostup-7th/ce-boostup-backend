@@ -8,12 +8,12 @@ import (
 //Statistic a stat of grader user
 type Statistic struct {
 	Name          string               `json:"name"`
-	Score         int                  `json:"score"`
+	Score         float64              `json:"score"`
 	ProgressArray []*Progress          `json:"progress_array"`
 	Overall       []*OverallSubmission `json:"overall"`
 	UserHistory   []*History           `json:"history"`
 	ActivePulse   []*Pulse             `json:"active_pulse"`
-	Histogram     []*Histogram            `json:"histogram"`
+	Histogram     []*Histogram         `json:"histogram"`
 }
 
 // OverallSubmission get the overall submission data of user
@@ -26,7 +26,7 @@ type OverallSubmission struct {
 type History struct {
 	ProblemID	int `json:"problem_id"`
 	Title		string `json:"title"`
-	Percen		float32 `json:"percen"`
+	Results		string `json:"results"`
 	LastDo		string `json:"last_do"`
 }
 
@@ -106,15 +106,23 @@ func SpecificUserStatWithID(id int) (*Statistic, error) {
 	allProblem.categoryid,
 	(case when userStats.count is NULL THEN 0 ELSE userStats.count END) as completed,
 	allProblem.count as all
-from (select public.problem.categoryid, count(public.problem.categoryid)
-	from public.submission
-	inner join public.problem
-	on public.submission.problem_id = public.problem.id 
-	where public.submission.score = public.submission.max_score and public.submission.usr_id = $1
-	group by public.problem.categoryid) as userStats
-full outer join (select public.problem.categoryid, count(public.problem.categoryid)
+from (
+	select a.categoryid, count(a.id)
+	from (
+		select public.problem.categoryid, public.problem.id
+		from public.submission
+		inner join public.problem
+		on public.submission.problem_id = public.problem.id 
+		where public.submission.score = public.submission.max_score and public.submission.usr_id = $1
+		group by public.problem.id
+	) as a
+	group by a.categoryid
+) as userStats
+full outer join (
+	select public.problem.categoryid, count(public.problem.categoryid)
 	from public.problem
-	group by public.problem.categoryid) as allProblem
+	group by public.problem.categoryid
+) as allProblem
 on userStats.categoryid = allProblem.categoryid
 order by allProblem.categoryid`
 	rows, err := db.DB.Query(statement, id)
@@ -138,27 +146,26 @@ order by allProblem.categoryid`
 	statistic.ProgressArray = progressArr
 
 	statement = 
-`select submission.problem_id, problem.title, submission.percen, submission.last_do
+`select submission.problem_id, problem.title, submission.results, submission.last_do
 from (
-	select public.submission.problem_id,
-		max(public.submission.submittedat) as last_do,
-		max(public.submission.score * 100.0 / public.submission.max_score) as percen
-	from public.submission
-	where public.submission.usr_id = $1
+	select distinct on (submission.problem_id) public.submission.problem_id, public.submission.submittedat as last_do, public.submission.results, submission.submission_id
+		from public.submission
+		where public.submission.usr_id = $1
 		and public.submission.problem_id not in (
-			select public.submission.problem_id 
+			select public.submission.problem_id
 			from public.submission
-			where public.submission.score = public.submission.max_score
+			where public.submission.usr_id = $1
+			and public.submission.score = public.submission.max_score
 			group by public.submission.problem_id
 		)
-	group by public.submission.problem_id
+	order by submission.problem_id, submission.submission_id desc
 ) as submission
 inner join (
 	select public.problem.id, public.problem.title
 	from public.problem
 ) as problem
 on submission.problem_id = problem.id
-order by submission.last_do desc
+order by submission.submission_id desc
 limit 4`
 	rows, err = db.DB.Query(statement, id)
 	if err != nil {
@@ -170,7 +177,7 @@ limit 4`
 	for rows.Next() {
 		history := new(History)
 
-		err := rows.Scan(&history.ProblemID, &history.Title, &history.Percen, &history.LastDo)
+		err := rows.Scan(&history.ProblemID, &history.Title, &history.Results, &history.LastDo)
 		if err != nil {
 			return nil, err
 		}
@@ -211,9 +218,9 @@ order by public.grader_user.score`
 	}
 	defer rows.Close()
 
-	scores := make([]int, 0)
+	scores := make([]float64, 0)
 	for rows.Next() {
-		score := 0
+		score := 0.0
 
 		err := rows.Scan(&score)
 		if err != nil {
@@ -227,8 +234,10 @@ order by public.grader_user.score`
 	max := scores[len(scores) - 1]
 
 	histograms := [5]int{0, 0, 0, 0, 0}
-	for _, v := range scores {
-		histograms[int(float32(v - min) / float32(max - min) * 4)]++
+	if !(min == 0.0 && max == 0.0) {
+		for _, v := range scores {
+			histograms[int(float32(v - min) / float32(max - min) * 4)]++
+		}
 	}
 
 	histograms[3] += histograms[4]
@@ -240,11 +249,8 @@ order by public.grader_user.score`
 		histogramOut := new(Histogram)
 
 		histogramOut.Amount = v
-		histogramOut.Start = float32(max-min) / 4.0 * float32(k)
-		histogramOut.Stop = float32(max-min) / 4.0 * float32(k + 1)
-		if k != 3 {
-			histogramOut.Stop--
-		}
+		histogramOut.Start = (float32(max-min) / 4.0 * float32(k)) + float32(min)
+		histogramOut.Stop = (float32(max-min) / 4.0 * float32(k + 1)) + float32(min)
 
 		histogramsOut = append(histogramsOut, histogramOut)
 	}

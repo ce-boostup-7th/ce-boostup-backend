@@ -4,7 +4,10 @@ import (
 	"ce-boostup-backend/conversion"
 	"ce-boostup-backend/model"
 	"net/http"
+	"fmt"
+	"os"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,7 +21,7 @@ func CreateUser(c echo.Context) error {
 	}
 
 	//hash a password
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	err := model.NewUser(user.Username, string(bytes))
 	if err != nil {
@@ -57,7 +60,10 @@ func UpdateUser(c echo.Context) error {
 	id, _ := conversion.StringToInt(str)
 
 	userPtr, _ := model.SpecificUserWithID(id)
-	user := *userPtr
+	user := new(model.User)
+	user.ID = userPtr.ID
+	user.Username = userPtr.Username
+	user.Score = userPtr.Score
 
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
@@ -67,7 +73,7 @@ func UpdateUser(c echo.Context) error {
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	user.Password = string(bytes)
 
-	err := model.UpdateUser(user)
+	err := model.UpdateUser(*user)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}
@@ -94,4 +100,29 @@ func DeleteUserWithSpecificID(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, err)
 	}
 	return c.String(http.StatusOK, "deleted")
+}
+
+func getUserID(c echo.Context) (int, error) {
+	// read a cookie
+	cookie, err := c.Cookie("JWT_Token")
+	if err != nil {
+		return -1, err
+	}
+
+	jwtString := cookie.Value
+	claims := jwt.MapClaims{}
+	_, err = jwt.ParseWithClaims(jwtString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("SECRET_KEY")), nil
+	})
+	if err != nil {
+		return -1, err
+	}
+
+	userIDStr := fmt.Sprintf("%v", claims["userID"])
+	userID, err := conversion.StringToInt(userIDStr)
+	if err != nil {
+		return -1, err
+	}
+
+	return userID, nil
 }

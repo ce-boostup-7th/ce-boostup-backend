@@ -21,10 +21,14 @@ type RespError struct {
 	Err error  `json:"err"`
 }
 
-// RespSingleProblem struct for json return
+//RespSingleProblem a problem model
 type RespSingleProblem struct {
-	Problem  model.Problem     `json:"problem"`
-	Testcase []*model.Testcase `json:"testcase"`
+	ID          int    `json:"id"`
+	CategoryID  int    `json:"category_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Difficulty  int    `json:"difficulty"`
+	Testcase	[]*model.Testcase `json:"testcase"`
 }
 
 // CreateProblem create a new problem Ou
@@ -51,6 +55,26 @@ func CreateProblem(c echo.Context) error {
 // GetAllProblems get all problems Ou
 func GetAllProblems(c echo.Context) error {
 	problems, err := model.AllProblems()
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Not found any problem",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusOK, problems)
+}
+
+// GetAllProblemsWithUserProgres get all problems Ou
+func GetAllProblemsWithUserProgres(c echo.Context) error {
+	userID, err := getUserID(c)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Invalid TOKEN",
+			Err: err,
+		})
+	}
+
+	problems, err := model.GetAllProblemsWithUserProgres(userID)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, &RespError{
 			Msg: "Not found any problem",
@@ -95,8 +119,12 @@ func GetProblemWithID(c echo.Context) error {
 
 	respSingleProblem := new(RespSingleProblem)
 
-	respSingleProblem.Problem = *problem
+	respSingleProblem.CategoryID = problem.CategoryID
+	respSingleProblem.Description = problem.Description
+	respSingleProblem.Difficulty = problem.Difficulty
+	respSingleProblem.ID = problem.ID
 	respSingleProblem.Testcase = testcase
+	respSingleProblem.Title = problem.Title
 
 	return c.JSON(http.StatusOK, respSingleProblem)
 }
@@ -209,8 +237,37 @@ func GetTestcaseWithID(c echo.Context) error {
 			Err: err,
 		})
 	}
+	
+	lent := len(testcase)
+	if lent > 3 {
+		lent = 3
+	}
+
+	testcase = testcase[0:lent]
+
 	return c.JSON(http.StatusOK, testcase)
 }
+
+// GetTestcaseWithIDAll get testcase from judge0 Ou
+func GetTestcaseWithIDAll(c echo.Context) error {
+	id, err := conversion.StringToInt(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RespError{
+			Msg: "ID can only be integer",
+			Err: err,
+		})
+	}
+
+	testcase, err := model.SpecificTestcaseWithID(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &RespError{
+			Msg: "Not found any testcase",
+			Err: err,
+		})
+	}
+	return c.JSON(http.StatusOK, testcase)
+}
+
 
 // UpdateTestcase create a new testcase Ou
 func UpdateTestcase(c echo.Context) error {

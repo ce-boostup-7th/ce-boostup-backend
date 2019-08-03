@@ -15,7 +15,15 @@ func Init() *echo.Echo {
 
 	// config CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:1234", "http://problem-injector.surge.sh", "https://ceboostup.netlify.com"},
+		AllowOrigins: []string{
+			"http://localhost:1234",
+			"http://problem-injector.surge.sh",
+			"https://ceboostup.netlify.com",
+			"http://boostup-demo.surge.sh",
+			"http://ce.19991999.xyz",
+			"https://ce.19991999.xyz",
+			"http://stafftest.19991999.xyz",
+		},
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 		AllowCredentials: true,
 	}))
@@ -35,28 +43,37 @@ func Init() *echo.Echo {
 	e.GET("/users", api.GetAllUsers)
 	e.GET("/users/:id", api.GetUserWithID)
 	e.POST("/users", api.CreateUser)
-	e.PUT("/users/:id", api.UpdateUser)
-	e.DELETE("/users", api.DeleteAllUsers)
-	e.DELETE("/users/:id", api.DeleteUserWithSpecificID)
 
 	//problem routes
-	e.POST("/problems", api.CreateProblem)
 	e.GET("/problems", api.GetAllProblems)
 	e.GET("/problems/:id", api.GetProblemWithID)
-	e.PUT("/problems/:id", api.UpdateProblem)
-	e.DELETE("/problems/:id", api.DeleteProblemWithSpecificID)
-
 	e.GET("/problems/:id/testcases", api.GetTestcaseWithID)
-	e.POST("/problems/:id/testcases", api.CreateTestcase)
-	e.PUT("/problems/:id/testcases/:index", api.UpdateTestcase)
-	e.DELETE("/problems/:id/testcases/:index", api.DeleteTestcase)
-
+	
 	//submission routes
 	e.POST("/submissions", api.CreateSubmission)
 	e.GET("/submissions", api.GetAllSubmissions)
 	e.GET("/submissions/:id", api.GetSubmissionWithID)
 
 	e.GET("/users/submissions", api.GetAllSubmissionsOfUser)
+	e.GET("/users/problems", api.GetAllProblemsWithUserProgres)
+	e.GET("/problems/:pid/submissions/last", api.GetLastUserSubmissionsFilteredByProblemID)
+
+	// ---------- only admin ----------
+	r := e.Group("/Ad-0Fj_kL8me")
+
+	// User routes
+	r.PUT("/users/:id", api.UpdateUser)
+	r.DELETE("/users/:id", api.DeleteUserWithSpecificID)
+
+	// problem routes
+	r.POST("/problems", api.CreateProblem)
+	r.PUT("/problems/:id", api.UpdateProblem)
+	r.DELETE("/problems/:id", api.DeleteProblemWithSpecificID)
+
+	r.POST("/problems/:id/testcases", api.CreateTestcase)
+	r.GET("/problems/:id/testcases", api.GetTestcaseWithIDAll)
+	r.PUT("/problems/:id/testcases/:index", api.UpdateTestcase)
+	r.DELETE("/problems/:id/testcases/:index", api.DeleteTestcase)
 
 	//special
 	e.GET("/users/stats", api.GetUserStats)

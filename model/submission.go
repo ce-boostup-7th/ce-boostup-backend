@@ -23,6 +23,21 @@ type Submission struct {
 	CompileOutput string  `json:"compile_output" form:"compile_output"`
 }
 
+// SubmissionNoSrc a model for submission Ou
+type SubmissionNoSrc struct {
+	SubmissionID 	int     `json:"submission_id"`
+	UserID       	int     `json:"user_id"`
+	ProblemID    	int     `json:"problem_id"`
+	LanguageID   	int     `json:"language_id"`
+	SubmittedAt  	string  `json:"submitted_at"`
+	Score        	int     `json:"score"`
+	MaxScore     	int     `json:"max_score"`
+	Runtime      	float64 `json:"runtime"`
+	MemoryUsage  	int     `json:"memory_usage"`
+	Results			string 	`json:"results"`
+	CompileOutput 	string	`json:"compile_output"`
+}
+
 // NewSubmission create a new submission ou
 func NewSubmission(userID int, problemID int, languageID int, src string) (*Submission, error) {
 	testcases, err := SpecificTestcaseWithID(problemID)
@@ -36,13 +51,8 @@ func NewSubmission(userID int, problemID int, languageID int, src string) (*Subm
 	submission.ProblemID = problemID
 	submission.LanguageID = languageID
 	submission.Src = src
-	// submission.Score = 0
 	submission.MaxScore = len(testcases)
-	// submission.Runtime = 0
-	// submission.MemoryUsage = 0
-	// submission.Results = ""
-	// submission.CompileOutput = ""
-
+	
 	resultsArr := make([]byte, len(testcases))
 
 	ch := make(chan *judge0.Result)
@@ -58,6 +68,11 @@ func NewSubmission(userID int, problemID int, languageID int, src string) (*Subm
 	for range testcases {
 		result := <-ch
 		index := <-chIndex
+
+		if result == nil {
+			resultsArr[index] = 'B'
+			continue
+		}
 
 		submission.MemoryUsage += result.Memory
 		submission.Runtime += conversion.StringToFloat(result.Time)
@@ -75,6 +90,24 @@ func NewSubmission(userID int, problemID int, languageID int, src string) (*Subm
 			resultsArr[index] = 'I'
 		default:
 			resultsArr[index] = 'X'
+			switch result.Status.ID {
+			case 1:
+				result.CompileOutput = "In Queue"
+			case 2:
+				result.CompileOutput = "Processing"
+			case 7:
+				result.CompileOutput = "Runtime Error (SIGSEGV)"
+			case 8:
+				result.CompileOutput = "Runtime Error (SIGXFSZ)"
+			case 9:
+				result.CompileOutput = "Runtime Error (SIGFPE)"
+			case 10:
+				result.CompileOutput = "Runtime Error (SIGABRT)"
+			case 11:
+				result.CompileOutput = "Runtime Error (NZEC)"
+			case 12:
+				result.CompileOutput = "Runtime Error (Other)"
+			}
 		}
 		submission.CompileOutput = result.CompileOutput
 	}
@@ -117,8 +150,8 @@ var baseSQL = `SELECT submission_id, src, usr_id, problem_id, lang_id, submitted
 	FROM public.submission`
 
 // AllSubmissions get all submissions Ou
-func AllSubmissions() ([]*Submission, error) {
-	rows, err := db.DB.Query(baseSQL + " ORDER BY submission_id")
+func AllSubmissions() ([]*SubmissionNoSrc, error) {
+	rows, err := db.DB.Query( baseSQL + " ORDER BY submission_id")
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +161,26 @@ func AllSubmissions() ([]*Submission, error) {
 		return nil, err
 	}
 
-	return submissions, nil
+	submissionsNoSrc := make([]*SubmissionNoSrc, 0)
+
+	for _, val := range submissions {
+		submissionNoSrc := new(SubmissionNoSrc)
+		submissionNoSrc.SubmissionID = val.SubmissionID
+		submissionNoSrc.UserID = val.UserID
+		submissionNoSrc.ProblemID = val.ProblemID
+		submissionNoSrc.LanguageID = val.LanguageID
+		submissionNoSrc.SubmittedAt = val.SubmittedAt
+		submissionNoSrc.Score = val.Score
+		submissionNoSrc.MaxScore = val.MaxScore
+		submissionNoSrc.Runtime = val.Runtime
+		submissionNoSrc.MemoryUsage = val.MemoryUsage
+		submissionNoSrc.Results = val.Results
+		submissionNoSrc.CompileOutput = val.CompileOutput
+
+		submissionsNoSrc = append(submissionsNoSrc, submissionNoSrc)
+	}
+
+	return submissionsNoSrc, nil
 }
 
 // AllSubmissionsFilteredByUserID filter all user that filtered by userID Ou
@@ -144,6 +196,22 @@ func AllSubmissionsFilteredByUserID(uid int) ([]*Submission, error) {
 	}
 
 	return submissions, nil
+}
+
+// LastUserSubmissionsFilteredByProblemID filter all user that filtered by userID Ou
+func LastUserSubmissionsFilteredByProblemID(uid int, pid int) (*Submission, error) {
+	row := db.DB.QueryRow(baseSQL + ` 
+where public.submission.problem_id = $2
+and public.submission.usr_id = $1
+order by public.submission.submission_id desc
+limit 1`, uid, pid)
+
+	submission, err := scanSubmissionRow(row)
+	if err != nil {
+		return nil, err
+	}
+
+	return submission, nil
 }
 
 // SpecificSubmission return a specific submission by id Ou
@@ -169,7 +237,19 @@ func DeleteAllSubmissions() error {
 }
 
 func collectScore(id int) error {
-	statement := `UPDATE grader_user SET score=(SELECT SUM(max) FROM (SELECT problem_id,MAX(score) FROM submission WHERE usr_id=$1 GROUP BY submission.problem_id) AS PREP) WHERE id=$1;`
+	statement := 
+`update public.grader_user
+set score = (
+	select sum(max) from (
+		select max(public.submission.score * 10.0 / public.submission.max_score) * public.problem.difficulty as max
+		from public.submission
+		inner join public.problem
+		on public.submission.problem_id = public.problem.id
+		where public.submission.usr_id = $1
+		group by public.submission.problem_id, public.problem.difficulty
+	) as score
+)
+where public.grader_user.id = $1`
 	_, err := db.DB.Exec(statement, id)
 	if err != nil {
 		return err
